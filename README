@@ -1,0 +1,18 @@
+# 2nd System Programming Assignment 2020
+**D. Alexandres, 1115201400006.**
+Second (2nd) assignment on UNIX system programming,
+*University of Athens, 2020.*
+
+Υλοποιήθηκε με C++ σε Ubuntu 16.04 LTS και δοκιμάστηκε σε μηχάνημα της σχολής.
+
+-----C++ ΚΟΜΜΑΤΙ---------
+#ENTOLH METAGLWTTISHS
+make
+#ENTOLH EKTELSHS
+Ίδια με της εκφώνησης (ή make run αν επιθυμεί ο χρήστης να ορίσει παραμέτρους στο makefile και να το τρέχει απο κει)
+
+-----BASH--------
+#ENTOLH EKTELSHS
+Ίδια με αυτή που αναφέρει η εκφώνηση για το bash script. Παρακαλώ θερμά να γίνεται σεβαστή η σειρά των ορισμάτων.
+Ο κώδικας του σκριπτ εχει αρκετά σχόλια που ξεκαθαρίζουν πως ακριβώς λειτουργεί και με ποια λογική.
+
