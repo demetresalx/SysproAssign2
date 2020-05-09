@@ -3,7 +3,7 @@ CFLAGS=-c -Wpedantic #-Ofast
 LDFLAGS=
 SOURCES=diseaseAggregator.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=diseaseMonitor
+EXECUTABLE=diseaseAggregator
 
 
 
@@ -25,5 +25,4 @@ clean:
 
 
 #GIA TO BASH 
-#./create_infiles.sh ../inputs/ass2/disfile ../inputs/ass2/coufile ../inputs 4 10
-
+#./create_infiles.sh ../inputs/ass2/disfile ../inputs/ass2/coufile ../inputs/ass2/input_dir 4 10

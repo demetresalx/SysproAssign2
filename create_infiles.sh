@@ -145,8 +145,8 @@ do #an den yparxei to subdirectory, ftiaksto
 			for x in $(seq 0 $((numRecordsPerFile-1)) )
 			do	#pame na valoume mesa tis numRecordsPerFile eggrafes
 				record=""
-				construct_record "$i$j$x"
-				echo $record >> "$input_dir/${cou_array[$i]}/$date"
+				construct_record "$i$j$x" #me auto to susswmatwma indexes prokyptei ena monadiko ID
+				echo $record >> "$input_dir/${cou_array[$i]}/$date" #grapse sto arxeio thn eggrafh ws line
 			done
 		else
 			j=$((j-1)) #as paei ena pisw se periptwsh poy prokypsei idio onoma arxeiou wste na prokyptei panta o swstos arithmos arxeiwn
