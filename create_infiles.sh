@@ -145,7 +145,7 @@ do #an den yparxei to subdirectory, ftiaksto
 			for x in $(seq 0 $((numRecordsPerFile-1)) )
 			do	#pame na valoume mesa tis numRecordsPerFile eggrafes
 				record=""
-				construct_record $x
+				construct_record "$i$j$x"
 				echo $record >> "$input_dir/${cou_array[$i]}/$date"
 			done
 		else
