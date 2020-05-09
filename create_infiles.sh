@@ -23,6 +23,37 @@ give_date () {
 	fi
 	
 }
+#Dhmiourgia eggrafwn
+construct_record (){
+	#ksekiname me to ID. Tha einai 1 random xarakthras + to index tous se arithmo. Logw tou 2ou tha eiani sigoura monadikes
+	local randomnum=$((0 + RANDOM % 26))
+	record="${alphabet[$randomnum]}$1"
+	#pame gia to exit/enter
+	randomnum=$((0 + RANDOM % 10))
+	record="$record ${status_array[$randomnum]} "
+	#pame gia First name
+	local randomnum2=$((3 + RANDOM % 10)) # [3,12] gia mhkos
+	for ix in $(seq 0 $((randomnum2-1)) )
+	do
+		randomnum=$((0 + RANDOM % 26))
+		record="$record${alphabet[$randomnum]}"
+	done
+	record="$record "
+	#pame gia Last name
+	randomnum2=$((3 + RANDOM % 10)) # [3,12] gia mhkos
+	for ij in $(seq 0 $((randomnum2-1)) )
+	do
+		randomnum=$((0 + RANDOM % 26))
+		record="$record${alphabet[$randomnum]}"
+	done
+	#pame gia disease
+	randomnum=$((0 + RANDOM % $num_dis))
+	record="$record ${dis_array[$randomnum]}"
+	#telos gia age
+	randomnum=$((1 + RANDOM % 120)) #[1,120] gia hlikia
+	record="$record $randomnum"	
+}
+
 
 #./create_infiles.sh diseasesFile countriesFile input_dir numFilesPerDirectory numRecordsPerFile
 #An den exoume akribws ta katallhla orismata, akuro
@@ -87,10 +118,16 @@ if [[ ! -d $input_dir ]]
 then
 	mkdir $input_dir
 fi
-#ftiaxnw ena subdirectory gia kathe xwra
+#akoulou8oun kapoies voh8htikes metavlhtes gia thn kataskeuh dates kai records.
+#Sto bash einai global kai 8a tis xrhsimopoioun oi sunarthseis poy eftiaksa
 year=0
 month=0
 day=0
+alphabet=("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z")
+#logika prepei ta enter na einai perissotera ap ta exits alliws tha exoume polles aporriptees (giati de tha yparxei to antistoixo enter)
+status_array=(ENTER ENTER ENTER ENTER EXIT EXIT ENTER ENTER ENTER ENTER) #gia 80% pithanothta enter kai 20 exit.
+
+#ftiaxnw ena subdirectory gia kathe xwra
 for i in $(seq 0 $((num_cou-1)) )
 do #an den yparxei to subdirectory, ftiaksto
 	if [[ ! -d "$input_dir/${cou_array[$i]}" ]]
@@ -103,8 +140,14 @@ do #an den yparxei to subdirectory, ftiaksto
 		give_date #kalw th sunarthsh poy dinei times sta year month day
 		date="$day-$month-$year"
 		if [[ ! -f "$input_dir/${cou_array[$i]}/$date" ]]
-		then
-			> "$input_dir/${cou_array[$i]}/$date"
+		then #pame na ftiaksoume arxeio k na valoume eggrafes mesa
+			> "$input_dir/${cou_array[$i]}/$date" #ftiaxnei to adeio arxika arxeio
+			for x in $(seq 0 $((numRecordsPerFile-1)) )
+			do	#pame na valoume mesa tis numRecordsPerFile eggrafes
+				record=""
+				construct_record $x
+				echo $record >> "$input_dir/${cou_array[$i]}/$date"
+			done
 		else
 			j=$((j-1)) #as paei ena pisw se periptwsh poy prokypsei idio onoma arxeiou wste na prokyptei panta o swstos arithmos arxeiwn
 		fi
