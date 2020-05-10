@@ -10,18 +10,38 @@ give_date () {
 	if (( $month == 1 || $month == 3 || $month == 5 || $month == 7 || $month == 8 || $month == 10 || $month == 12 ))
 	then
 		day=$((1 + RANDOM % 31))
+		if (( day < 10 ))
+		then
+			day="0$day" #gia dipshfio format
+		fi
 	elif (( $month == 4 || $month == 6 || $month == 9 || $month == 11 ))
 	then
 		day=$((1 + RANDOM % 30))
+		if (( day < 10 ))
+		then
+			day="0$day" #gia dipshfio format
+		fi
 	else #febrouarios, 28 h 29 depending on year % 4
 		if (( $year % 4 == 0 )) #disekto, mexri 29
 		then
 			day=$((1 + RANDOM % 29))
+			if (( day < 10 ))
+			then
+				day="0$day" #gia dipshfio format
+			fi
 		else
 			day=$((1 + RANDOM % 28))
+			if (( day < 10 ))
+			then
+				day="0$day" #gia dipshfio format
+			fi
 		fi
 	fi
-	
+	if (( month < 10 ))
+	then
+		month="0$month" #gia dipshfio format
+	fi
+
 }
 #Dhmiourgia eggrafwn
 construct_record (){
@@ -51,7 +71,7 @@ construct_record (){
 	record="$record ${dis_array[$randomnum]}"
 	#telos gia age
 	randomnum=$((1 + RANDOM % 120)) #[1,120] gia hlikia
-	record="$record $randomnum"	
+	record="$record $randomnum"
 }
 
 
@@ -154,10 +174,3 @@ do #an den yparxei to subdirectory, ftiaksto
 		#echo haya
 	done
 done
-
-
-
-
-
-
-
