@@ -18,7 +18,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 run:
-	./$(EXECUTABLE) -i ../inputs/ass2/_medium.txt -w 20 -b 128
+	./$(EXECUTABLE) -i ../inputs/ass2/input_dir -w 4 -b 128
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) $(TESTEXEC)
