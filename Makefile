@@ -18,11 +18,11 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 run:
-	./$(EXECUTABLE) -i ../inputs/ass2/input_dir -w 4 -b 128
+	./$(EXECUTABLE) -i ../inputs/ass2/input_dir -w 3 -b 128
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) $(TESTEXEC)
 
 
-#GIA TO BASH 
+#GIA TO BASH
 #./create_infiles.sh ../inputs/ass2/disfile ../inputs/ass2/coufile ../inputs/ass2/input_dir 4 10
