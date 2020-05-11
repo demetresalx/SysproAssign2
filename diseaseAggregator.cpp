@@ -70,7 +70,11 @@ int main(int argc, char** argv){
   //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
   int pipe_fds[2*numWorkers]; //ta file descriptors twn pipes
   if(pid > 0){ //parent
-    //signal(SIGCHLD, myhand);
+    struct sigaction act, oldact; //gia xeirismo SIGCHLD
+    sigaction(SIGCHLD, NULL, &oldact); //kratame thn palia sumperifora gia restoration argotera
+    sigfillset(&(act.sa_mask));
+    act.sa_handler = &myhand ;//o handler moy
+    sigaction(SIGCHLD, &act, NULL); //to orisame!
     //std::cout << "i am parent and will write to children\n";
     for(int i=0; i<numWorkers; i++){
       pipe_fds[2*i +1] = open(pipe_names[2*i +1], O_WRONLY ); //anoigma kathe pipe pros ta paidia gia grapsimo
@@ -142,6 +146,7 @@ int main(int argc, char** argv){
     //close(fd);
   }
 
+  //Perimene kathe paidi kai sbhse ta pipes tou
   if(pid >0){ //parent
     for(int i=0; i<numWorkers; i++){
       wait();
