@@ -1,6 +1,5 @@
 //MAIN ARXEIO. Apo edw trexei h efarmogh.
 #include <iostream>
-#include <string> //EPITREPETAI EIPWTHHKE STO PIAZZA
 #include <cstring> //strcpy gia ta pathings. genika oxi idiaitera
 #include <unistd.h>
 #include <sys/types.h>
@@ -9,14 +8,11 @@
 #include <sys/poll.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/wait.h>
+#include "worker.h"
+#include "boss.h"
+#include "utils.h"
 
-#define PERMS 0666
-
-int maho=0;
-void myhand(int signo){
-  maho=1;
-  std::cout << "PETHANA " << getpid() << "\n";
-}
 
 int main(int argc, char** argv){
 
@@ -45,9 +41,10 @@ int main(int argc, char** argv){
 
   //Dhmiourgia named pipes
   char pipe_names[2*numWorkers][100];
+  std::string pip_names[2*numWorkers];
   for(int i=0; i<2*numWorkers; i++){
-    std::string namer = "fifo" + std::to_string(i);
-    strcpy(pipe_names[i], namer.c_str()); //onomata ths morfhs fifo1,fifo2 ktl
+    pip_names[i] = "fifo" + std::to_string(i);
+    strcpy(pipe_names[i], pip_names[i].c_str()); //onomata ths morfhs fifo1,fifo2 ktl
     mkfifo(pipe_names[i], PERMS);
   }
 
@@ -70,24 +67,10 @@ int main(int argc, char** argv){
   //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
   int pipe_fds[2*numWorkers]; //ta file descriptors twn pipes
   if(pid > 0){ //parent
-    struct sigaction act, oldact; //gia xeirismo SIGCHLD
-    sigaction(SIGCHLD, NULL, &oldact); //kratame thn palia sumperifora gia restoration argotera
-    sigfillset(&(act.sa_mask));
-    act.sa_handler = &myhand ;//o handler moy
-    sigaction(SIGCHLD, &act, NULL); //to orisame!
-    //std::cout << "i am parent and will write to children\n";
-    for(int i=0; i<numWorkers; i++){
-      pipe_fds[2*i +1] = open(pipe_names[2*i +1], O_WRONLY ); //anoigma kathe pipe pros ta paidia gia grapsimo
-      //std::cout << "i am parent and opened to child\n";
-      write(pipe_fds[2*i +1], &pids[i], sizeof(pids[i]));
-      std::cout << "child pid is " << pids[i] << "\n";
-    }
-    /*int fd = open("maju", O_WRONLY );
-    std::cout << "i am parent and opened to child\n";
-    write(fd, &pid, sizeof(pid));
-    std::cout << "child pid is " << pid << "\n";*/
-    std::string line;
-    //close(fd);
+
+
+    //douelia sto boss.cpp
+    administrate(input_path, numWorkers , bufferSize ,pip_names, pids, pipe_fds);
 
 
     /*while(1){
@@ -112,19 +95,12 @@ int main(int argc, char** argv){
       maho=0;
 
     }
-    close(fd);*/
+    */
   }
   else{ //child
-    signal(SIGUSR1, myhand);
-    //std::cout << "i am child and will read from par\n";
-    //anoigw to 2*index + 1 gt einai to katallhlo pipe gia diabasma apo ton worker
-    int fd = open(pipe_names[2*child_index +1], O_RDONLY );
-    //std::cout << "i am child and opened to par\n";
-    int mi;
-    //sleep(1);
-    read(fd, &mi, 4);
-    printf("my pid is %d\n", mi);
-    //close(fd);
+
+    //douleia sto worker.cpp
+    work(pipe_names[2*child_index +1],pipe_names[2*child_index]);
 
     //while(1){
       //std::cout << "child openchan\n";
@@ -143,20 +119,25 @@ int main(int argc, char** argv){
       //}
       //maho =0;
     //}
-    //close(fd);
   }
 
   //Perimene kathe paidi kai sbhse ta pipes tou
   if(pid >0){ //parent
     for(int i=0; i<numWorkers; i++){
-      wait();
-      unlink(pipe_names[2*i]);
-      unlink(pipe_names[2*i +1]);
+      int stats;
+      int fpid= waitpid(-1, &stats, 0);
+      //release file descriptors
+      close(pipe_fds[2*i]);
+      close(pipe_fds[2*i +1]);
+      //unlink gia sbhsimo pipes tou kathe paidiou. Meta th wait to paidi tha exei teleiwsei kai den ta xrhsimopoiei pleon
+      if( unlink(pipe_names[2*i]) < 0)
+            perror("Error: Cannot unlink worker");
+        if( unlink(pipe_names[2*i +1]) < 0)
+            perror("Error: Cannor unlink jobExecutor");
+      //printf("teleiwse o %d\n", fpid);
     }
 
   }
-
-
 
 
     return 0;

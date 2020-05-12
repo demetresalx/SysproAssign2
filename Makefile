@@ -1,7 +1,7 @@
 CC=g++  -std=c++11
 CFLAGS=-c -Wpedantic #-Ofast
 LDFLAGS=
-SOURCES=diseaseAggregator.cpp
+SOURCES=diseaseAggregator.cpp worker.cpp utils.cpp boss.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=diseaseAggregator
 
