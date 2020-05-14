@@ -3,6 +3,6 @@
 
 #include <string> //EPITREPETAI EIPWTHHKE STO PIAZZA
 
-int administrate(char *, int , int , std::string *, int *, int *);
+int administrate(char *, int , int , std::string *, int *);
 
 #endif

@@ -48,7 +48,6 @@ int main(int argc, char** argv){
     mkfifo(pipe_names[i], PERMS);
   }
 
-  char cbuf[150];
   int pids[numWorkers]; //pinakas me ta pids twn paidiwn
   //dhmiourgia paidiwn-workers
   int pid;
@@ -63,14 +62,11 @@ int main(int argc, char** argv){
 
   }
 
-  //ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
-  //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
-  int pipe_fds[2*numWorkers]; //ta file descriptors twn pipes
   if(pid > 0){ //parent
 
 
     //douelia sto boss.cpp
-    administrate(input_path, numWorkers , bufferSize ,pip_names, pids, pipe_fds);
+    administrate(input_path, numWorkers , bufferSize ,pip_names, pids);
 
 
     /*while(1){
@@ -100,7 +96,7 @@ int main(int argc, char** argv){
   else{ //child
 
     //douleia sto worker.cpp
-    work(pipe_names[2*child_index +1],pipe_names[2*child_index]);
+    work(pipe_names[2*child_index +1],pipe_names[2*child_index], bufferSize);
 
     //while(1){
       //std::cout << "child openchan\n";
@@ -127,8 +123,8 @@ int main(int argc, char** argv){
       int stats;
       int fpid= waitpid(-1, &stats, 0);
       //release file descriptors
-      close(pipe_fds[2*i]);
-      close(pipe_fds[2*i +1]);
+      //close(pipe_fds[2*i]);
+      //close(pipe_fds[2*i +1]);
       //unlink gia sbhsimo pipes tou kathe paidiou. Meta th wait to paidi tha exei teleiwsei kai den ta xrhsimopoiei pleon
       if( unlink(pipe_names[2*i]) < 0)
             perror("Error: Cannot unlink worker");
