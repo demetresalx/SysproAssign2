@@ -15,6 +15,8 @@
 
 int work(char * rd_p, char * wrt_p, int bsize){
   //pairnw ta onomata twn pipes kai ta krataw gia eykolia
+  int pipe_fd, pipe_fd2;
+  char sbuf[500];
   char read_pipe[64];
   char write_pipe[64];
   strcpy(read_pipe, rd_p);
@@ -32,26 +34,40 @@ int work(char * rd_p, char * wrt_p, int bsize){
 
   //std::cout << "i am child and opened to par\n";
 
-  struct pollfd pipe_fds[2]; //ta file descriptors twn pipes poy tha mpoyn kai sthn poll
+  /*struct pollfd pipe_fds[2]; //ta file descriptors twn pipes poy tha mpoyn kai sthn poll
   memset (pipe_fds, 0, sizeof(pipe_fds)); // not necessary, but I am paranoid
   //int mi = poll(pipe_fd, 1, 3000);
-
-  int pipe_fd = open(read_pipe, O_RDONLY );
-  int red;
-  pipe_fds[0].fd = pipe_fd;
-  pipe_fds[0].events = POLLIN;
+  */
+  int n_dirs=0;
+  //pipe_fds[0].fd = pipe_fd;
+  //pipe_fds[0].events = POLLIN;
   //sleep(1);
 
-  read(pipe_fd, &red, 4);
-  printf("my pid is %d\n", red);
+  //DIABAZW DIRECTORIES POY MOY EDWSE O GONIOS
 
-  int pipe_fd2 = open(write_pipe, O_WRONLY);
+    pipe_fd = open(read_pipe, O_RDONLY );
+    read(pipe_fd, &n_dirs, sizeof(int));
+
+    for(int i=0; i<n_dirs; i++){
+      //pipe_fd = open(read_pipe, O_RDONLY );
+      read(pipe_fd, sbuf, 7);
+      std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
+      //close(pipe_fd);
+    }
+    close(pipe_fd);
+
+
+
+
+
+  /*int pipe_fd2 = open(write_pipe, O_WRONLY);
   pipe_fds[1].fd = pipe_fd2;
   pipe_fds[1].events = POLLOUT;
   write(pipe_fd2, "he" ,3);
+  close(pipe_fd2);
+  */
+  char but[500];
 
-  char but[60];
-  close(pipe_fd); close(pipe_fd2);
 
   //pipe_fd = open(read_pipe, O_RDONLY | O_NONBLOCK );
   while(1){
@@ -78,7 +94,7 @@ int work(char * rd_p, char * wrt_p, int bsize){
     else
       perror("Poll error:");
       */
-      int pipe_fd = open(read_pipe, O_RDONLY );
+      pipe_fd = open(read_pipe, O_RDONLY );
       int rdb = read(pipe_fd, but, bsize);
       std::cout << "diabas apo gonio "<< but << getpid() <<"\n";
       close(pipe_fd);
