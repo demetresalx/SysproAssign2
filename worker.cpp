@@ -67,43 +67,37 @@ int work(char * rd_p, char * wrt_p, int bsize){
   write(pipe_fd2, "he" ,3);
   close(pipe_fd2);
   */
-  char but[500];
+  //sleep(4);
 
+  strcpy(sbuf, "");
+  char sbuf2[200];
+  strcpy(sbuf2, "");
 
   //pipe_fd = open(read_pipe, O_RDONLY | O_NONBLOCK );
+
   while(1){
-    /*int rp = poll(pipe_fds, 2, 3000);
-    if(rp !=0){
 
-      if(pipe_fds[0].revents & POLLIN){ //exoume readable fd!
-        read(pipe_fds[0].fd, but2, bsize);
-        std::cout << "diabas apo gonio "<< but2 <<"\n";
-        if(strcmp(but, "/exit") ==0) //telos
-          break;
-        //int jikan = write(pipe_fds[1].fd, but, strlen(but) +1);
-
-        //perror("chld write");
-      }
-      if(pipe_fds[1].revents & POLLOUT){ //exoume writeable fd!
-        int ji = write(pipe_fds[1].fd, but, strlen(but) +1);
-        std::cout << ji << " egrapsa ws paidi\n";
-      }
-
-    }
-    else if(rp == 0)
-      std::cout << "ch timeout!\n";
-    else
-      perror("Poll error:");
-      */
+      //printf("I am %d and i will rd block\n", getpid());
       read_fd = open(read_pipe, O_RDONLY );
-      int rdb = read(read_fd, but, bsize);
-      std::cout << "diabas apo gonio "<< but << getpid() <<"\n";
-      close(read_fd);
-      if(strcmp(but, "/laugh") !=0){
-        write_fd = open(write_pipe, O_WRONLY);
-        write(write_fd, "meow", strlen("mewo") +1);
-        close(write_fd);
-      }
+
+        //int rdb = read(read_fd, sbuf2, bsize);
+        int rdb = receive_string(read_fd, sbuf2, bsize);
+        while(strcmp(sbuf2, "") ==0){
+          rdb = receive_string(read_fd, sbuf2, bsize);
+        }
+        std::cout << "diabas apo gonio "<< sbuf2 << getpid() <<"\n";
+
+        close(read_fd);
+        if(strcmp(sbuf2, "mariah") !=0){
+          //std::cout << "bout to freak out " << getpid() << "\n";
+          write_fd = open(write_pipe, O_WRONLY );
+          //write(write_fd, "meow", strlen("mewo") +1);
+          send_string(write_fd, "meow", bsize);
+          close(write_fd);
+        }
+
+      //close(read_fd);
+
 
 
   }

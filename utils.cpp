@@ -18,11 +18,17 @@ int send_string(int fd, char * str, int b){
   int bwrit = write(fd, &size, sizeof(int));
   //stelnoyme twra to string
 
-  /*while( (bwrit = write(fd, str, size)) < size )
+  int offs=0;
+  /*while( (bwrit = write(fd, str+offs, size)) < size ){
+    size = size - bwrit;
+    offs = offs +bwrit;
     totalwr += bwrit;
-  */
+  }*/
+
+
   bwrit = write(fd, str, size);
-  //std::cout << "egrapsa " << totalwr << "bytes\n";
+  //std::cout << "parsize is " << size << "\n";
+  //std::cout << "egrapsa " << bwrit << "bytes\n";
   return totalwr;
 }
 
@@ -33,13 +39,20 @@ int receive_string(int fd, char * buf, int b){
   int size =0;
   //pare mhkos erxomenhs sumvoloseiras
   int brd = read(fd, &size, sizeof(int));
+  //std::cout << "size is " << size << "\n";
   //pare twra to string
-  /*while( (brd = read(fd, tool, size)) > 0 ){
+  brd = read(fd, buf, size);
+  /*while(brd < size ){
+    //std::cout << "nai";
+    size = size - brd;
+    brd = read(fd, tool, size);
     strcat(buf, tool);
     totalrd += brd;
+    if(brd == 0)
+      break;
   }*/
-  brd = read(fd, buf, size);
-  //std::cout << "diabasa " << totalrd << "bytes\n";
+  //brd = read(fd, buf, size);
+  //std::cout << "diabasa " << brd << "bytes\n";
   return totalrd;
 
 }

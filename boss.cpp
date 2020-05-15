@@ -90,6 +90,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     //pipe_fds[2*i +1].events = POLLOUT; //arxikopoiw gia thn poll
     //gia paidi i, grafw sto 2*i +1, diabazw apo to 2*
     write(pipe_fds[2*i +1].fd, &(dirs_per_wrk[i]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
+    //std::cout << dirs_per_wrk[i];
     for(int j=0; j< dirs_per_wrk[i]; j++){
       sprintf(abuf, "%s/%s", in_dir,(subdirs[dirs_writ]).c_str() ); //pairnw to dir_name kai to bazw mazi me to inputdir (ftiaxnw path)
       send_string(pipe_fds[2*i +1].fd, abuf, bsize);
@@ -118,45 +119,32 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
   std::string line;
 
+
   while(getline(std::cin, line)){
-    /*for(int i=0; i<wnum; i++){
-      pipe_fds[2*i].events = POLLIN; //arxikopoiw gia thn poll
-      pipe_fds[2*i +1].events = POLLOUT; //arxikopoiw gia thn poll
-    }
 
-    int rp = poll(pipe_fds, 2*wnum, 3000);
-    if(rp !=0){
-      for(int i=0; i<wnum; i++){
-        if(pipe_fds[2*i +1].revents & POLLOUT){ //exoume writeable fd!
-          write(pipe_fds[2*i +1].fd, line.c_str(), strlen(line.c_str()) +1);
-        }
-
-      }
-      for(int i=0; i<wnum; i++){
-        if(pipe_fds[2*i].revents & POLLIN){ //exoume readable fd!
-          int nr = read(pipe_fds[2*i].fd, but, bsize);
-          std::cout << "diabasa apo paidi " << but <<"\n";
-        }
-      }
-
-    }
-    else if(rp == 0)
-      std::cout << "par timeout!\n";
-    else
-      perror("Poll error:");
-      */
+    std::cout << "line is " << line << "\n";
     for(int i=0; i<wnum; i++){
-      pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY );
-      write(pipe_fds[2*i +1].fd, line.c_str(), strlen(line.c_str()) +1);
+      //std::cout << "i am par and i  will wrt block\n";
+      pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY);
+      //write(pipe_fds[2*i +1].fd, line.c_str(), strlen(line.c_str()) +1);
+      char eleos[200];
+      strcpy(eleos, line.c_str());
+      send_string(pipe_fds[2*i +1].fd, eleos, bsize);
+      //std::cout << "i wrote\n";
       close(pipe_fds[2*i +1].fd);
     }
     //diabase apo paidi
-    for(int i=0; i<wnum; i++){
-      pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY );
-      read(pipe_fds[2*i].fd, but, bsize);
-      std::cout << "diabasa apo paidi " << but << "\n";
-      close(pipe_fds[2*i].fd);
-    }
+
+      for(int i=0; i<wnum; i++){
+        //std::cout << "iam par and i will rd blck\n";
+        pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY);
+        //read(pipe_fds[2*i].fd, but, bsize);
+        receive_string(pipe_fds[2*i].fd, but, bsize);
+        std::cout << "diabasa apo paidi " << but << "\n";
+        close(pipe_fds[2*i].fd);
+      }
+
+
 
     if(line == "/exit"){ //telos
       for(int i=0; i<wnum; i++)
