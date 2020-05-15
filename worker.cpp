@@ -15,7 +15,7 @@
 
 int work(char * rd_p, char * wrt_p, int bsize){
   //pairnw ta onomata twn pipes kai ta krataw gia eykolia
-  int pipe_fd, pipe_fd2;
+  int read_fd, write_fd;
   char sbuf[500];
   char read_pipe[64];
   char write_pipe[64];
@@ -45,16 +45,17 @@ int work(char * rd_p, char * wrt_p, int bsize){
 
   //DIABAZW DIRECTORIES POY MOY EDWSE O GONIOS
 
-    pipe_fd = open(read_pipe, O_RDONLY );
-    read(pipe_fd, &n_dirs, sizeof(int));
-
+    read_fd = open(read_pipe, O_RDONLY );
+    read(read_fd, &n_dirs, sizeof(int));
+    //std::cout << "sbuf " << sbuf;
     for(int i=0; i<n_dirs; i++){
-      //pipe_fd = open(read_pipe, O_RDONLY );
-      read(pipe_fd, sbuf, 7);
+      //read_fd = open(read_pipe, O_RDONLY );
+      receive_string(read_fd, sbuf, bsize );
+      //read(read_fd, sbuf, 7);
       std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
       //close(pipe_fd);
     }
-    close(pipe_fd);
+    close(read_fd);
 
 
 
@@ -94,14 +95,14 @@ int work(char * rd_p, char * wrt_p, int bsize){
     else
       perror("Poll error:");
       */
-      pipe_fd = open(read_pipe, O_RDONLY );
-      int rdb = read(pipe_fd, but, bsize);
+      read_fd = open(read_pipe, O_RDONLY );
+      int rdb = read(read_fd, but, bsize);
       std::cout << "diabas apo gonio "<< but << getpid() <<"\n";
-      close(pipe_fd);
+      close(read_fd);
       if(strcmp(but, "/laugh") !=0){
-        pipe_fd2 = open(write_pipe, O_WRONLY);
-        write(pipe_fd2, "meow", strlen("mewo") +1);
-        close(pipe_fd2);
+        write_fd = open(write_pipe, O_WRONLY);
+        write(write_fd, "meow", strlen("mewo") +1);
+        close(write_fd);
       }
 
 
@@ -109,8 +110,8 @@ int work(char * rd_p, char * wrt_p, int bsize){
 
 
 
-  close(pipe_fd);
-  close(pipe_fd2);
+  close(read_fd);
+  close(write_fd);
 
 
 

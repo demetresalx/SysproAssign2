@@ -8,5 +8,10 @@ extern int maho;
 
 void myhand(int ); //o handler
 
+//grapse string se pipe me akribh tropo. isws de xreiastei
+int send_string(int , char *, int );
+
+//diabase string se pipe me akribh tropo. isws de xreiastei
+int receive_string(int, char * , int);
 
 #endif

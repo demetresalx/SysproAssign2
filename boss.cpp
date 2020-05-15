@@ -72,6 +72,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   act.sa_handler = &myhand ;//o handler moy
   //sigaction(SIGCHLD, &act, NULL); //to orisame!*/
 
+  char abuf[300]; //ergaleio gia reading apo pipes ktl
   std::string * subdirs = NULL; //tha mpoun ta subdir names
   int * dirs_per_wrk = new int[wnum](); //gia na dw an teleiwse me tous katalogous gia to i paidi, initialized to 0
   int dirs_n=0;
@@ -90,7 +91,9 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     //gia paidi i, grafw sto 2*i +1, diabazw apo to 2*
     write(pipe_fds[2*i +1].fd, &(dirs_per_wrk[i]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
     for(int j=0; j< dirs_per_wrk[i]; j++){
-      write(pipe_fds[2*i +1].fd, (subdirs[dirs_writ]).c_str(), strlen((subdirs[dirs_writ]).c_str())+1 ); //grapse to directory name
+      sprintf(abuf, "%s/%s", in_dir,(subdirs[dirs_writ]).c_str() ); //pairnw to dir_name kai to bazw mazi me to inputdir (ftiaxnw path)
+      send_string(pipe_fds[2*i +1].fd, abuf, bsize);
+      //write(pipe_fds[2*i +1].fd, abuf, strlen(abuf)+1 ); //grapse to directory name
       //std::cout << "egarpsa to " << subdirs[dirs_writ] << "\n";
       dirs_writ++;
     }
