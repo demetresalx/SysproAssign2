@@ -10,6 +10,13 @@
 #include "boss.h"
 #include "utils.h"
 
+int glob_counter=0; //gia na perimenei oti ola ta paidia einai ok
+
+//xeirismos SIGUSR1 gia na fanei oti ena paidi etoimasthke
+void foo(int signo){
+  //signal(signo, foo);
+  glob_counter++;
+}
 //ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
 //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
 
@@ -66,11 +73,11 @@ int detect_subdirs(char * inpdir, int * dleft, std::string ** subdrs){
 //ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
 //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
 int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, int * pids){
-  /*struct sigaction act, oldact; //gia xeirismo SIGCHLD
-  sigaction(SIGCHLD, NULL, &oldact); //kratame thn palia sumperifora gia restoration argotera
-  sigfillset(&(act.sa_mask));
-  act.sa_handler = &myhand ;//o handler moy
-  //sigaction(SIGCHLD, &act, NULL); //to orisame!*/
+  //struct sigaction first_act; //gia xeirismo SIGUSR1 arxika
+  //sigfillset(&(first_act.sa_mask));
+  //first_act.sa_handler = &foo ;//o handler moy
+  //sigaction(SIGUSR1, &first_act, NULL); //to orisame!
+  //signal(SIGUSR1, foo);
 
   char abuf[300]; //ergaleio gia reading apo pipes ktl
   std::string * subdirs = NULL; //tha mpoun ta subdir names
@@ -105,31 +112,33 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   delete[] dirs_per_wrk;
   delete[] subdirs; //apodesmeush axreiastou pleon pinaka
 
+  std::string tool;
 
-  char but[500];
 
-  /*for(int i=0; i<wnum; i++){
-    pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY); //anoigma kathe pipe apo ta paidia gia diabasma
-    pipe_fds[2*i].events = POLLIN; //arxikopoiw gia thn poll
+  //sigourepsou (mesw blocking pipes) oti de tha proxwrhseis prin ola ta paidia teleiwsoun to parsing
+  for(int i=0; i<wnum; i++){
+    pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY );
+    receive_string(pipe_fds[2*i].fd, &tool, bsize);
+    if(tool == "ok") //teleiwse to parsing to paidi
+      glob_counter++;
+    close(pipe_fds[2*i].fd);
+  }
+  if(glob_counter ==wnum)
+    std::cout << "parsing donezo!\n";
 
-    read(pipe_fds[2*i].fd, but, bsize);
-    std::cout << but;
-    close(pipe_fds[2*i].fd); //comment me poll
-  }*/
-
+  //std::cout << "ola ok!\n";
   std::string line;
 
-
   while(getline(std::cin, line)){
-
     std::cout << "line is " << line << "\n";
     for(int i=0; i<wnum; i++){
       //std::cout << "i am par and i  will wrt block\n";
       pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY);
       //write(pipe_fds[2*i +1].fd, line.c_str(), strlen(line.c_str()) +1);
-      char eleos[200];
-      strcpy(eleos, line.c_str());
-      send_string(pipe_fds[2*i +1].fd, eleos, bsize);
+      //char eleos[200];
+      //strcpy(eleos, line.c_str());
+      //send_string(pipe_fds[2*i +1].fd, eleos, bsize);
+      send_string(pipe_fds[2*i +1].fd, &line, bsize);
       //std::cout << "i wrote\n";
       close(pipe_fds[2*i +1].fd);
     }
@@ -139,8 +148,8 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         //std::cout << "iam par and i will rd blck\n";
         pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY);
         //read(pipe_fds[2*i].fd, but, bsize);
-        receive_string(pipe_fds[2*i].fd, but, bsize);
-        std::cout << "diabasa apo paidi " << but << "\n";
+        receive_string(pipe_fds[2*i].fd, &tool, bsize);
+        std::cout << "diabasa apo paidi " << tool << "\n";
         close(pipe_fds[2*i].fd);
       }
 
@@ -160,5 +169,5 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     close(pipe_fds[2*i +1].fd);
   }
 
-
+return 0;
 }
