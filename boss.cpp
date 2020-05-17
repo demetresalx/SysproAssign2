@@ -6,7 +6,6 @@
 #include <sys/stat.h> //open
 #include <fcntl.h> //open k flags
 #include <unistd.h> //read, write
-#include <dirent.h> //gia DIRECTORIES
 #include "boss.h"
 #include "utils.h"
 
@@ -20,55 +19,17 @@ void foo(int signo){
 //ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
 //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
 
+//sunarthsh poy kanei ROUND-ROBIN share ta directories sta paidia-workers
 int share_dirs(int *dpw, int ndirs, int ws){
-  int share=ndirs/ws;
+  int share=ndirs/ws; //posa tha parei toulaxiston kathe paidi
   for(int i=0; i<ws; i++)
     dpw[i] = share;
-  share = ndirs % ws;
+  share = ndirs % ws; //posa meinane
   for(int i=0; i<share; i++)
-    dpw[i] += 1;
+    dpw[i] += 1; //round robin ena o kathenas twra
   return 0;
 }
 
-int detect_subdirs(char * inpdir, int * dleft, std::string ** subdrs){
-  DIR *dp;
-  struct dirent *dirp;
-  //anoigw kai tsekarw oti einai ok
-  dp = opendir(inpdir);
-  if(dp == NULL)
-  {
-      std::cout << "Error opening " << inpdir << "\n";
-      return errno;
-  }
-  //metraw ta directories poy exei mesa
-  while ((dirp = readdir(dp)) != NULL){
-    if((strcmp(dirp->d_name, ".") == 0)||(strcmp(dirp->d_name, "..") == 0))
-      continue;
-    *(dleft) += 1;
-  }
-  closedir(dp);
-
-  if(*dleft > 0){
-    dp = opendir(inpdir);
-    if(dp == NULL)
-    {
-        std::cout << "Error opening " << inpdir << "\n";
-        return errno;
-    }
-    //metraw ta directories poy exei mesa
-
-    *subdrs = new std::string[*dleft];
-    int in =0;
-    while ((dirp = readdir(dp)) != NULL){ //krata to dir name
-      if((strcmp(dirp->d_name, ".") == 0)||(strcmp(dirp->d_name, "..") == 0))
-        continue;
-      (*subdrs)[in] = std::string(dirp->d_name);
-      in++;
-    }
-    closedir(dp);
-  }
-  return 0;
-}
 
 //ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
 //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
@@ -83,7 +44,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   std::string * subdirs = NULL; //tha mpoun ta subdir names
   int * dirs_per_wrk = new int[wnum](); //gia na dw an teleiwse me tous katalogous gia to i paidi, initialized to 0
   int dirs_n=0;
-  detect_subdirs(in_dir, &dirs_n, &subdirs); //euresh dirs
+  extract_files(in_dir, &dirs_n, &subdirs); //euresh dirs
   share_dirs(dirs_per_wrk, dirs_n, wnum); //katanomh dirs
 
   struct pollfd pipe_fds[2*wnum]; //ta file descriptors twn pipes poy tha mpoyn kai sthn poll
@@ -100,7 +61,9 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     //std::cout << dirs_per_wrk[i];
     for(int j=0; j< dirs_per_wrk[i]; j++){
       sprintf(abuf, "%s/%s", in_dir,(subdirs[dirs_writ]).c_str() ); //pairnw to dir_name kai to bazw mazi me to inputdir (ftiaxnw path)
-      send_string(pipe_fds[2*i +1].fd, abuf, bsize);
+      //std::cout << "ok";
+      send_string(pipe_fds[2*i +1].fd, &(subdirs[dirs_writ]), bsize); //steile onoma xwras sketo
+      send_string(pipe_fds[2*i +1].fd, abuf, bsize); //steile to path
       //write(pipe_fds[2*i +1].fd, abuf, strlen(abuf)+1 ); //grapse to directory name
       //std::cout << "egarpsa to " << subdirs[dirs_writ] << "\n";
       dirs_writ++;

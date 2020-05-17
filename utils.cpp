@@ -31,6 +31,7 @@ int send_string(int fd, std::string * str, int b){
   strcpy(a, (*str).c_str());
   int totalwr =0;
   int size = strlen(a) +1; //to mhkos poy prepei na steilei prwta
+  //std::cout << *str;
   int bwrit = write(fd, &size, sizeof(int));
   //stelnoyme twra to string
 
@@ -98,4 +99,45 @@ int receive_string(int fd, std::string * str, int b){
   //std::cout << "diabasa " << brd << "bytes\n";
   return totalrd;
 
+}
+
+//gia na pairnw ta files poy exoun mesa ta countries-dirs
+int extract_files(char * inpdir, int * fleft, std::string ** fls){
+  DIR *dp;
+  struct dirent *dirp;
+  //anoigw kai tsekarw oti einai ok
+  dp = opendir(inpdir);
+  if(dp == NULL)
+  {
+      std::cout << "Error opening " << inpdir << "\n";
+      return errno;
+  }
+  //metraw ta directories poy exei mesa
+  while ((dirp = readdir(dp)) != NULL){
+    if((strcmp(dirp->d_name, ".") == 0)||(strcmp(dirp->d_name, "..") == 0))
+      continue;
+    *(fleft) += 1;
+  }
+  closedir(dp);
+
+  if(*fleft > 0){
+    dp = opendir(inpdir);
+    if(dp == NULL)
+    {
+        std::cout << "Error opening " << inpdir << "\n";
+        return errno;
+    }
+    //metraw ta directories poy exei mesa
+
+    *fls = new std::string[*fleft];
+    int in =0;
+    while ((dirp = readdir(dp)) != NULL){ //krata to dir name
+      if((strcmp(dirp->d_name, ".") == 0)||(strcmp(dirp->d_name, "..") == 0))
+        continue;
+      (*fls)[in] = std::string(dirp->d_name);
+      in++;
+    }
+    closedir(dp);
+  }
+  return 0;
 }

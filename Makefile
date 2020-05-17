@@ -1,7 +1,7 @@
 CC=g++  -std=c++11
 CFLAGS=-c -Wpedantic #-Ofast
 LDFLAGS=
-SOURCES=diseaseAggregator.cpp worker.cpp utils.cpp boss.cpp
+SOURCES=diseaseAggregator.cpp worker.cpp utils.cpp boss.cpp record.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=diseaseAggregator
 
@@ -18,7 +18,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 run:
-	./$(EXECUTABLE) -i ../inputs/ass2/input_dir -w 5 -b 128
+	./$(EXECUTABLE) -i ../inputs/ass2/input_dir -w 3 -b 128
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) $(TESTEXEC)
