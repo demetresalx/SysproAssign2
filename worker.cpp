@@ -14,7 +14,7 @@
 
 //ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
 //PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
-void print_records_in_file(std::string filename, std::string folder){
+void print_records_in_file(std::string filename, std::string date, std::string folder){
   std::ifstream infile(filename.c_str()); //diabasma apo tis grammes tou arxeiou
   std::string line; //EPITREPETAI H STRING EIPAN STO PIAZZA
   while (std::getline(infile, line)){
@@ -32,7 +32,7 @@ void print_records_in_file(std::string filename, std::string folder){
         params_count++;
     }//telos while eksagwghs gnwrismatwn apo grammh
     if(params_count != 6) //kati leipei/pleonazei, akurh h eggrafh!
-      continue;
+      {/*std::cout<< "BAD rec\n";*/continue;}
     //fernw thn eggrafh sth morfh ths ergasias 1 gia na einai apodotika kai eukolotera ta queries
     true_record_parts[0] = record_parts[0]; //id
     true_record_parts[1] = record_parts[2]; //first name
@@ -40,13 +40,15 @@ void print_records_in_file(std::string filename, std::string folder){
     true_record_parts[3] = record_parts[4]; //disease
     true_record_parts[4] = folder; //country
     if(record_parts[1] == "ENTER")
-      true_record_parts[5] = filename; //entrydate to onoma tou arxeiou
+      true_record_parts[5] = date; //entrydate to onoma tou arxeiou
     else if(record_parts[1] == "EXIT")
-      true_record_parts[6] = filename; //exitdate to onoma tou arxeiou
+      true_record_parts[6] = date; //exitdate to onoma tou arxeiou
+    else //kakh eggrafh, aporripsh k sunexeia
+      {/*std::cout<< "BAD rec\n";*/continue;}
     true_record_parts[7] = record_parts[5]; //age
     record * new_rec_ptr = new record(true_record_parts); //dhmiourgia eggrafhs
-    std::cout << new_rec_ptr->get_recordID() << " " << new_rec_ptr->get_patientFirstName() << " " << new_rec_ptr->get_age() << "\n";
-
+    //std::cout << new_rec_ptr->get_recordID() << " " << new_rec_ptr->get_patientFirstName() << " " << new_rec_ptr->get_age() << " " << new_rec_ptr->get_entryDate()<< " " << new_rec_ptr->get_country() << "\n";
+    //TO PERNAW STIS DOMES ME ELEGXO GIA EXIT AN YPARXEI KTL!!
   }//telos while diabasmatos arxeiou
 
 }
@@ -55,6 +57,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
 
   int read_fd, write_fd;
   char sbuf[500];
+  char jbuf[500];
   int n_dirs=0;
   int n_files=0;
   //oi domes moy. Enas aplos HT gia eggrafes kai oi HTs apo thn ergasia 1
@@ -75,8 +78,9 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       receive_string(read_fd, sbuf, bsize ); //pairnw olo to path
       extract_files(sbuf, &n_files, &date_files); //pairnw plhrofories
       for(int j=0; j<n_files; j++){
-        sprintf(sbuf, "%s/%s",sbuf, (date_files[j]).c_str());
-        print_records_in_file(std::string(sbuf), countries[i]);
+        strcpy(jbuf, "");
+        sprintf(jbuf, "%s/%s",sbuf, (date_files[j]).c_str());
+        print_records_in_file(std::string(jbuf), date_files[j] ,countries[i]);
       }
 
       //std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
