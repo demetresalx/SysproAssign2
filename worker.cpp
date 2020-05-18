@@ -10,13 +10,16 @@
 #include "worker.h"
 #include "utils.h"
 #include "record.h"
+#include "record_HT.h"
 
 
-//ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
-//PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
-void print_records_in_file(std::string filename, std::string date, std::string folder){
+//diabazei arxeio kai kanei populate tis domes (apo 1h ergasia oi perissoteres)
+void print_records_in_file(std::string filename, std::string date, std::string folder, record_HT * rht ){
   std::ifstream infile(filename.c_str()); //diabasma apo tis grammes tou arxeiou
   std::string line; //EPITREPETAI H STRING EIPAN STO PIAZZA
+  if(is_date_ok(date) == false) //an to date onoma arxeiou den einai hmeromhnia, asto
+    return;
+
   while (std::getline(infile, line)){
     //https://stackoverflow.com/questions/49201654/splitting-a-string-with-multiple-delimiters-in-c
     std::string const delims{ " \t,\r\n" }; //delimiters einai ta: space,tab,comma kai carriage return. TELOS.
@@ -49,6 +52,7 @@ void print_records_in_file(std::string filename, std::string date, std::string f
     record * new_rec_ptr = new record(true_record_parts); //dhmiourgia eggrafhs
     //std::cout << new_rec_ptr->get_recordID() << " " << new_rec_ptr->get_patientFirstName() << " " << new_rec_ptr->get_age() << " " << new_rec_ptr->get_entryDate()<< " " << new_rec_ptr->get_country() << "\n";
     //TO PERNAW STIS DOMES ME ELEGXO GIA EXIT AN YPARXEI KTL!!
+    rht->insert_record(new_rec_ptr);
   }//telos while diabasmatos arxeiou
 
 }
@@ -61,7 +65,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   int n_dirs=0;
   int n_files=0;
   //oi domes moy. Enas aplos HT gia eggrafes kai oi HTs apo thn ergasia 1
-  //record_HT records_htable(50); //o DIKOS MOU HT gia tis eggrafes basei recordID megethous h1+h2. KALUTEROS APO APLH LISTA
+  record_HT records_htable(50); //o DIKOS MOU HT gia tis eggrafes basei recordID megethous h1+h2. KALUTEROS APO APLH LISTA
   //diseaseHashTable diseases_htable(25, bucketSize); //O erg1 HT GIA DISEASE
   //countryHashTable countries_htable(25, bucketSize); //O erg1 HT GIA COUNTRY
 
@@ -80,7 +84,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       for(int j=0; j<n_files; j++){
         strcpy(jbuf, "");
         sprintf(jbuf, "%s/%s",sbuf, (date_files[j]).c_str());
-        print_records_in_file(std::string(jbuf), date_files[j] ,countries[i]);
+        print_records_in_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable);
       }
 
       //std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
