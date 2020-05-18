@@ -92,6 +92,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
     }
     close(read_fd);
     delete[] countries; //svhse to new poy egine
+    //records_htable.print_contents();
 
 
 
