@@ -54,7 +54,7 @@ int record_HT::insert_record(record * rec){
             {delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
             currptr->rec_ptr->set_exitDate(rec->get_exitDate()); //enhmerwse exit date
             delete rec;
-            return 0; //ola ok
+            return 3; //ola ok
           }
           else{ //yphrxa me exit date, ftanei. oxi deutero exit
             delete rec;
@@ -76,7 +76,7 @@ int record_HT::insert_record(record * rec){
           {delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
           currptr->rec_ptr->set_exitDate(rec->get_exitDate()); //enhmerwse exit date
           delete rec;
-          return 0; //ola ok
+          return 3; //ola ok
         }
         else{ //yphrxa me exit date, ftanei. oxi deutero exit
           delete rec;

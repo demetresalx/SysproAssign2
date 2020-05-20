@@ -11,10 +11,28 @@
 #include "utils.h"
 #include "record.h"
 #include "record_HT.h"
+#include "cdHashTable.h"
 
+//pernaei telika tis eggrafes kai stous allous HT afou exoun ginei oi elegxoi
+void populate_other_HTs(record_HT * rht , diseaseHashTable * dht, countryHashTable * cht){
+  for(unsigned int i=0; i<rht->size; i++){
+    if(rht->table[i] == NULL) //kenh alusida
+      continue;
+    else{
+      record_HT_node * currptr = rht->table[i];
+      while(currptr!= NULL){ //paei sto teleutaio. ENDEIKTIKH EKTYPWSH. MONO MERIKA PEDIA ALLA MPORW KAI OLA
+        //std::cout << currptr->rec_ptr->get_recordID() << " " << currptr->rec_ptr->get_diseaseID() << " " << currptr->rec_ptr->get_patientFirstName() << " " << currptr->rec_ptr->get_entryDate() << " " <<currptr->rec_ptr->get_exitDate() <<"\n";
+        dht->insert_record(currptr->rec_ptr);
+        cht->insert_record(currptr->rec_ptr);
+        currptr = currptr->next ;
+      }//telos while gia orizontia lista
+    }//telos else
+  }//telos for gia kathe alusida
+
+}
 
 //diabazei arxeio kai kanei populate tis domes (apo 1h ergasia oi perissoteres)
-void print_records_in_file(std::string filename, std::string date, std::string folder, record_HT * rht ){
+void parse_records_from_file(std::string filename, std::string date, std::string folder, record_HT * rht){
   std::ifstream infile(filename.c_str()); //diabasma apo tis grammes tou arxeiou
   std::string line; //EPITREPETAI H STRING EIPAN STO PIAZZA
   if(is_date_ok(date) == false) //an to date onoma arxeiou den einai hmeromhnia, asto
@@ -52,8 +70,11 @@ void print_records_in_file(std::string filename, std::string date, std::string f
     record * new_rec_ptr = new record(true_record_parts); //dhmiourgia eggrafhs
     //std::cout << new_rec_ptr->get_recordID() << " " << new_rec_ptr->get_patientFirstName() << " " << new_rec_ptr->get_age() << " " << new_rec_ptr->get_entryDate()<< " " << new_rec_ptr->get_country() << "\n";
     //TO PERNAW STIS DOMES ME ELEGXO GIA EXIT AN YPARXEI KTL!!
-    rht->insert_record(new_rec_ptr);
-  }//telos while diabasmatos arxeiou
+    int parsed = rht->insert_record(new_rec_ptr);
+    if(parsed < 0)
+      continue; //den egine insert gt exei problhma, pame epomenh
+
+  }//telos while diabasmatos arxeiou, pername tis eggrafes stous alloues 2HT ths askhshs 1
 
 }
 
@@ -66,8 +87,8 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   int n_files=0;
   //oi domes moy. Enas aplos HT gia eggrafes kai oi HTs apo thn ergasia 1
   record_HT records_htable(50); //o DIKOS MOU HT gia tis eggrafes basei recordID megethous h1+h2. KALUTEROS APO APLH LISTA
-  //diseaseHashTable diseases_htable(25, bucketSize); //O erg1 HT GIA DISEASE
-  //countryHashTable countries_htable(25, bucketSize); //O erg1 HT GIA COUNTRY
+  diseaseHashTable diseases_htable(25, 64); //O erg1 HT GIA DISEASE
+  countryHashTable countries_htable(25, 64); //O erg1 HT GIA COUNTRY
 
 
 
@@ -84,7 +105,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       for(int j=0; j<n_files; j++){
         strcpy(jbuf, "");
         sprintf(jbuf, "%s/%s",sbuf, (date_files[j]).c_str());
-        print_records_in_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable);
+        parse_records_from_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable);
       }
 
       //std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
@@ -92,7 +113,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
     }
     close(read_fd);
     delete[] countries; //svhse to new poy egine
+    populate_other_HTs(&records_htable, &diseases_htable, &countries_htable); //perna tis eggrafes sou kai stous allous 2 pinakes askhshs 1
     //records_htable.print_contents();
+    //diseases_htable.print_contents();
+    //countries_htable.print_contents();
 
 
 

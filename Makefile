@@ -1,7 +1,7 @@
 CC=g++  -std=c++11
 CFLAGS=-c -Wpedantic #-Ofast
 LDFLAGS=
-SOURCES=diseaseAggregator.cpp worker.cpp utils.cpp boss.cpp record.cpp record_HT.cpp
+SOURCES=diseaseAggregator.cpp worker.cpp utils.cpp boss.cpp record.cpp record_HT.cpp cdHashTable.cpp bbst.cpp topk.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=diseaseAggregator
 
@@ -26,3 +26,5 @@ clean:
 
 #GIA TO BASH
 #./create_infiles.sh ../inputs/ass2/disfile ../inputs/ass2/coufile ../inputs/ass2/input_dir 4 10
+#../inputs/ass2/input_dir
+#/home/demetres/Desktop/bashforLarge/input_dir
