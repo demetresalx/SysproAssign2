@@ -69,7 +69,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       dirs_writ++;
     }
 
-    close(pipe_fds[2*i +1].fd);
+    //close(pipe_fds[2*i +1].fd);//afhnw anoixta
 
   }//telos for gia moirasma directories
   delete[] dirs_per_wrk;
@@ -84,7 +84,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     receive_string(pipe_fds[2*i].fd, &tool, bsize);
     if(tool == "ok") //teleiwse to parsing to paidi
       glob_counter++;
-    close(pipe_fds[2*i].fd);
+    //close(pipe_fds[2*i].fd);//afhnw anoixta
   }
   if(glob_counter ==wnum)
     std::cout << "parsing donezo!\n";
@@ -93,36 +93,37 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   std::string line;
 
   while(getline(std::cin, line)){
-    std::cout << "line is " << line << "\n";
+    //std::cout << "line is " << line << "\n";
+
     for(int i=0; i<wnum; i++){
       //std::cout << "i am par and i  will wrt block\n";
-      pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY);
-      //write(pipe_fds[2*i +1].fd, line.c_str(), strlen(line.c_str()) +1);
-      //char eleos[200];
-      //strcpy(eleos, line.c_str());
-      //send_string(pipe_fds[2*i +1].fd, eleos, bsize);
+      //pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY);
+
       send_string(pipe_fds[2*i +1].fd, &line, bsize);
       //std::cout << "i wrote\n";
-      close(pipe_fds[2*i +1].fd);
+      //close(pipe_fds[2*i +1].fd);
     }
+
+    if(line == "/exit"){ //telos
+      //for(int i=0; i<wnum; i++)
+        //kill(pids[i], SIGKILL);
+      break;
+    }
+
     //diabase apo paidi
 
       for(int i=0; i<wnum; i++){
         //std::cout << "iam par and i will rd blck\n";
-        pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY);
+        //pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY);
         //read(pipe_fds[2*i].fd, but, bsize);
         receive_string(pipe_fds[2*i].fd, &tool, bsize);
         std::cout << "diabasa apo paidi " << tool << "\n";
-        close(pipe_fds[2*i].fd);
+        //close(pipe_fds[2*i].fd);
       }
 
 
 
-    if(line == "/exit"){ //telos
-      for(int i=0; i<wnum; i++)
-        kill(pids[i], SIGKILL);
-      break;
-    }
+
 
   }
 

@@ -10,6 +10,7 @@ Second (2nd) assignment on UNIX system programming,
 make
 #ENTOLH EKTELSHS
 Ίδια με της εκφώνησης (ή make run αν επιθυμεί ο χρήστης να ορίσει παραμέτρους στο makefile και να το τρέχει απο κει)
+Παρακαλώ οι ηλικίες των εγγραφών στα διάφορα αρχεία να είναι αριθμοί για να μην υπάρξουν προβλήματα με την stoi.
 
 -----BASH--------
 #ENTOLH EKTELSHS

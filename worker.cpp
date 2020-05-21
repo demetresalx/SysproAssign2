@@ -13,6 +13,8 @@
 #include "record_HT.h"
 #include "cdHashTable.h"
 
+int summary_entries =0;
+
 //pernaei telika tis eggrafes kai stous allous HT afou exoun ginei oi elegxoi
 void populate_other_HTs(record_HT * rht , diseaseHashTable * dht, countryHashTable * cht){
   for(unsigned int i=0; i<rht->size; i++){
@@ -32,7 +34,7 @@ void populate_other_HTs(record_HT * rht , diseaseHashTable * dht, countryHashTab
 }
 
 //diabazei arxeio kai kanei populate tis domes (apo 1h ergasia oi perissoteres)
-void parse_records_from_file(std::string filename, std::string date, std::string folder, record_HT * rht){
+void parse_records_from_file(std::string filename, std::string date, std::string folder, record_HT * rht, file_summary* summ){
   std::ifstream infile(filename.c_str()); //diabasma apo tis grammes tou arxeiou
   std::string line; //EPITREPETAI H STRING EIPAN STO PIAZZA
   if(is_date_ok(date) == false) //an to date onoma arxeiou den einai hmeromhnia, asto
@@ -68,15 +70,20 @@ void parse_records_from_file(std::string filename, std::string date, std::string
     else //kakh eggrafh, aporripsh k sunexeia
       {std::cout<< "ERROR\n";continue;}
     true_record_parts[7] = record_parts[5]; //age
+    if(stoi(true_record_parts[7]) < 0)//arnhtiko age, proxwrame
+      {std::cout<< "ERROR\n";continue;}
     record * new_rec_ptr = new record(true_record_parts); //dhmiourgia eggrafhs
     //std::cout << new_rec_ptr->get_recordID() << " " << new_rec_ptr->get_patientFirstName() << " " << new_rec_ptr->get_age() << " " << new_rec_ptr->get_entryDate()<< " " << new_rec_ptr->get_country() << "\n";
     //TO PERNAW STIS DOMES ME ELEGXO GIA EXIT AN YPARXEI KTL!!
     int parsed = rht->insert_record(new_rec_ptr);
     if(parsed < 0)
-      {std::cout<< "ERROR\n";} //den egine insert gt exei problhma, pame epomenh
+      {std::cout<< "ERROR\n";continue;} //den egine insert gt exei problhma, pame epomenh
+    //PAME na perasoume thn plhroforia poy phrame sth domh summary
+    if(summ->insert_data(true_record_parts) == 1)
+      summary_entries += 1; //mphke kainourgia astheneia
 
   }//telos while diabasmatos arxeiou, pername tis eggrafes stous alloues 2HT ths askhshs 1
-
+  //std::cout << "i was " << filename << " " << summ->diseasename <<" "<< summ->age_cats[0] << "\n";
 }
 
 int work(char * read_pipe, char * write_pipe, int bsize){
@@ -105,28 +112,31 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       extract_files(sbuf, &n_files, &date_files); //pairnw plhrofories
       sort_files(date_files,0 ,n_files-1); //sort by date gia pio swsto parsing
       for(int j=0; j<n_files; j++){
+        summary_entries=0; //gia na kserw ti tha pw sto gonio
+        file_summary * mysum = new file_summary; //boh8htikh domh gia to summary poy tha stelnei meta apo kathe arxeio sto gonio
         strcpy(jbuf, "");
         sprintf(jbuf, "%s/%s",sbuf, (date_files[j]).c_str());
-        parse_records_from_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable);
+        parse_records_from_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable, mysum);
+        delete mysum;
       }
 
       //std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
       delete[] date_files; //sbhse to new poy egine
     }
-    close(read_fd);
+    //close(read_fd); //to afhnw anoixto
     delete[] countries; //svhse to new poy egine
     populate_other_HTs(&records_htable, &diseases_htable, &countries_htable); //perna tis eggrafes sou kai stous allous 2 pinakes askhshs 1
     //records_htable.print_contents();
     //diseases_htable.print_contents();
     //countries_htable.print_contents();
 
-
+    //STELNW STO GONIO TA SUMMARY STATISTICS
 
     //enhmerwnw gonio oti teleiwsa to parsing
     write_fd = open(write_pipe, O_WRONLY );
     //write(write_fd, "meow", strlen("mewo") +1);
     send_string(write_fd, "ok", bsize);
-    close(write_fd);
+    //close(write_fd); // to afhnw anoixto
 
   //sleep(4);
 
@@ -135,13 +145,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   strcpy(sbuf2, "");
   std::string tool;
 
+  //arxizw na pairnw entols xrhsth
   while(1){
 
-      //printf("I am %d and i will rd block\n", getpid());
-      read_fd = open(read_pipe, O_RDONLY );
 
-        //int rdb = read(read_fd, sbuf2, bsize);
-        //int rdb = receive_string(read_fd, sbuf2, bsize);
         int rdb = receive_string(read_fd, &tool, bsize);
         while(tool == ""){
           //rdb = receive_string(read_fd, sbuf2, bsize);
@@ -149,24 +156,12 @@ int work(char * read_pipe, char * write_pipe, int bsize){
         }
         std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
 
-        close(read_fd);
-        /*if(strcmp(sbuf2, "mariah") !=0){
-          //std::cout << "bout to freak out " << getpid() << "\n";
-          write_fd = open(write_pipe, O_WRONLY );
-          //write(write_fd, "meow", strlen("mewo") +1);
-          send_string(write_fd, "meow", bsize);
-          close(write_fd);
-        }*/
+
+        if(tool == "/exit")
+          break;
         if(tool != "mariah"){
-          //std::cout << "bout to freak out " << getpid() << "\n";
-          write_fd = open(write_pipe, O_WRONLY );
-          //write(write_fd, "meow", strlen("mewo") +1);
           send_string(write_fd, "meow", bsize);
-          close(write_fd);
         }
-
-      //close(read_fd);
-
 
 
   }
@@ -175,7 +170,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
 
   close(read_fd);
   close(write_fd);
-
+  //std::cout << "eftasa\n";
   return 0;
 
 

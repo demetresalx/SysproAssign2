@@ -31,4 +31,18 @@ std::string dates_compare(std::string , std::string );
 //elegxei an ena date einai ok
 bool is_date_ok(std::string );
 
+//boh8htikh domh gia to summary. anaferetai se dedomena enos arxeiou ana io
+//sthn epanalhpsh sthn opoia xrhsimopoeitai einai gnwsth h xwra kai h hmeromhnia opote de thn krataw kai edw
+class file_summary{
+public:
+  std::string diseasename; //onoma-hmeromhnia arxeiou
+  int age_cats[4]; //arithmos krousmatwn ana hlikiakh kathgoria
+  file_summary * next; //o epomenos ios
+
+  file_summary();
+  ~file_summary();
+  int insert_data(std::string * ); //enhmerwnei tis metavlhtes poy prepei apo ta merh enos record
+  void print_contents();
+};
+
 #endif

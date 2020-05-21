@@ -78,6 +78,7 @@ int receive_string(int fd, char * buf, int b){
 //to krataei se string anti gia gia char array
 int receive_string(int fd, std::string * str, int b){
   char tool[300];
+  strcpy(tool, "");
   int totalrd =0;
   int size =0;
   //pare mhkos erxomenhs sumvoloseiras
@@ -279,4 +280,50 @@ void sort_files(std::string * filesn , int low, int high){
         sort_files(filesn, low, pi - 1);
         sort_files(filesn, pi + 1, high);
     }
+}
+
+//gia th boh8htikh klash gia ta summaries ana io arxeiou
+file_summary::file_summary(){
+  diseasename = "";
+  for(int i=0; i<4; i++)
+    age_cats[i] = 0; //arxikopoiei se 0
+  next = NULL;
+}
+//me tous kala orismenous destructors ths c++ arkei! h katastrofh ginetai anadromika se olous!!
+file_summary::~file_summary(){
+  delete next;
+}
+
+int file_summary::insert_data(std::string * record_parts){
+  if(record_parts[5] != "-"){ //koitame MONO tis enter gia ta summaries
+    if(diseasename == ""){ //mono thn prwth fora
+      diseasename = record_parts[3]; //pare thn astheneia
+      if((std::stoi(record_parts[7]) >= 0)&&(std::stoi(record_parts[7]) <= 20))
+        {age_cats[0] += 1; return 1;} //ekei anhkei
+      else if((std::stoi(record_parts[7]) >= 21)&&(std::stoi(record_parts[7]) <= 40))
+        {age_cats[1] += 1; return 1;} //ekei anhkei
+      else if((std::stoi(record_parts[7]) >= 41)&&(std::stoi(record_parts[7]) <= 60))
+        {age_cats[2] += 1; return 1;} //ekei anhkei
+      else
+        {age_cats[3] += 1; return 1;} //ekei anhkei
+    }
+    if(diseasename == record_parts[3]){ //bre8hke h as8eneia, kanoyme enhmerwsh
+      if((std::stoi(record_parts[7]) >= 0)&&(std::stoi(record_parts[7]) <= 20))
+        {age_cats[0] += 1; return 0;} //ekei anhkei
+      else if((std::stoi(record_parts[7]) >= 21)&&(std::stoi(record_parts[7]) <= 40))
+        {age_cats[1] += 1; return 0;} //ekei anhkei
+      else if((std::stoi(record_parts[7]) >= 41)&&(std::stoi(record_parts[7]) <= 60))
+        {age_cats[2] += 1; return 0;} //ekei anhkei
+      else
+        {age_cats[3] += 1; return 0;} //ekei anhkei
+    }//telos if bre8hke astehneia
+    if(next == NULL){ //to vazoume ston epomeno adeio
+      next = new file_summary;
+      return next->insert_data(record_parts);
+    }
+    else //an o epomenos den einai adeios, tha krinei autos
+      return next->insert_data(record_parts);
+
+  }//telos if einai entry eggrafh
+  return -1;
 }
