@@ -154,13 +154,38 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           //rdb = receive_string(read_fd, sbuf2, bsize);
           rdb = receive_string(read_fd, &tool, bsize);
         }
-        std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
+        //std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
 
 
-        if(tool == "/exit")
+        if(tool == "/exit"){
+          //isws cleanup??
           break;
-        if(tool != "mariah"){
-          send_string(write_fd, "meow", bsize);
+        }
+        else if(tool == "bad"){
+          ;;//send_string(write_fd, "meow", bsize);
+        }
+        else if(tool == "/diseaseFrequency1"){ //xwris orisma country
+          std::string dis_name;
+          rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
+          std::string date1;
+          rdb = receive_string(read_fd, &date1, bsize); //diabase date1
+          std::string date2;
+          rdb = receive_string(read_fd, &date2, bsize); //diabase date2
+          printf("i am %d and i got %s\n", getpid(),dis_name.c_str() );
+        }
+        else if(tool == "/diseaseFrequency2"){ //ME orisma country
+          std::string dis_name;
+          rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
+          std::string date1;
+          rdb = receive_string(read_fd, &date1, bsize); //diabase date1
+          std::string date2;
+          rdb = receive_string(read_fd, &date2, bsize); //diabase date2
+          std::string country;
+          rdb = receive_string(read_fd, &country, bsize); //diabase date2
+          printf("i am %d and i got %s and %s\n", getpid(),dis_name.c_str(), country.c_str() );
+        }
+        else{
+          std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
         }
 
 

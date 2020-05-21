@@ -94,32 +94,87 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
   while(getline(std::cin, line)){
     //std::cout << "line is " << line << "\n";
-
-    for(int i=0; i<wnum; i++){
-      //std::cout << "i am par and i  will wrt block\n";
-      //pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY);
-
-      send_string(pipe_fds[2*i +1].fd, &line, bsize);
-      //std::cout << "i wrote\n";
-      //close(pipe_fds[2*i +1].fd);
-    }
-
     if(line == "/exit"){ //telos
       //for(int i=0; i<wnum; i++)
         //kill(pids[i], SIGKILL);
+      for(int i=0; i<wnum; i++)
+        send_string(pipe_fds[2*i +1].fd, &line, bsize);
       break;
     }
+    else{ //arxizoun oi entoles
+      std::string const delims{ " \t\r\n" }; //delimiters einai ta: space,tab kai carriage return. TELOS.
+      size_t beg, pos = 0;
+      std::string requ[12]; //o arithmos orismatwn einai sugkekrimenos gia sugkekrimenes entoles opote de mas noiazei to orio
+      int ind=0; //arithmos orismatwn + tou onomatos entolhs
+      while ((beg = line.find_first_not_of(delims, pos)) != std::string::npos){
+          pos = line.find_first_of(delims, beg + 1);
+          requ[ind] = line.substr(beg, pos - beg);
+          ind++;
+      }//telos while eksagwghs gnwrismatwn apo entolh
+      if(requ[0] == "/diseaseFrequency"){
+          if(ind == 4){ //xwris to proairetiko country
+            if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
+              std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+              continue;
+            }
+            if((requ[2] == "-") || requ[3]== "-"){
+              std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+              continue;
+            }
+            //prow9hse to aithma sta children mesw pipe
+            for(int i=0; i<wnum; i++){
+              send_string(pipe_fds[2*i +1].fd, "/diseaseFrequency1", bsize);//steile thn entolh
+              send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
+              send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
+              send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+            }
+          }
+          else if(ind ==5){ //me proairetiko orisma country
+            if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
+              std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+              continue;
+            }
+            if((requ[2] == "-") || requ[3]== "-"){
+              std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+              continue;
+            }
+            //prow9hse to aithma sta children mesw pipe
+            for(int i=0; i<wnum; i++){
+              send_string(pipe_fds[2*i +1].fd, "/diseaseFrequency2", bsize);//steile thn entolh
+              send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
+              send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
+              send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+              send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile country
+            }
+          }
+          else{//ekana lathos sthn entolh
+            std::cout << "Lathos sta orismata. try again...\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+          }
+
+      }//telos if gia to poia kai pws einai h nonexit entolh
+      else{
+        std::cout << "kakws orismenh entolh\n";
+        for(int i=0; i<wnum; i++)
+          send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+      }
+    }//telos else gia to an einai nonexit entolh
+
+
+
+
 
     //diabase apo paidi
 
-      for(int i=0; i<wnum; i++){
+      /*for(int i=0; i<wnum; i++){
         //std::cout << "iam par and i will rd blck\n";
         //pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY);
         //read(pipe_fds[2*i].fd, but, bsize);
         receive_string(pipe_fds[2*i].fd, &tool, bsize);
         std::cout << "diabasa apo paidi " << tool << "\n";
         //close(pipe_fds[2*i].fd);
-      }
+      }*/
 
 
 
