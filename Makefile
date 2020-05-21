@@ -18,7 +18,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 run:
-	./$(EXECUTABLE) -i ../inputs/ass2/input_dir -w 3 -b 128
+	./$(EXECUTABLE) -i /home/demetres/Desktop/bashforLarge/input_dir -w 3 -b 128
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) $(TESTEXEC)

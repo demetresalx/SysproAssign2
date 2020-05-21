@@ -34,6 +34,7 @@ int record_HT::insert_record(record * rec){
 
   if(table[hval] == NULL){ //ean den yparxei alusida ekei, th ftiaxnoyme
     if(rec->get_entryDate() == "-"){ // h eggrafh den yparxei kai den einai gia EXIT. aporriptetai
+      //std::cout << "ERROR den yparxw kai eimai exit " << rec->get_recordID() << "\n";
       delete rec;
       return -1;
     }
@@ -42,21 +43,23 @@ int record_HT::insert_record(record * rec){
   else{ //yparxei alusida, pame sto telos ENW KOITAZOUME gia IDIO ID
     record_HT_node * currptr = table[hval];
     while(currptr->next != NULL){ //paei sto teleutaio
-      if(currptr->rec_ptr->get_recordID() == rec->get_recordID()) //brethhke idio id, abort mission!
+      if(currptr->rec_ptr->get_recordID() == rec->get_recordID()) //brethhke idio id
       {
         if(rec->get_entryDate() != "-"){ // h eggrafh yparxei kai exei entry. aporriptetai
+          //std::cout << "ERROR yparxw kai den ksanakanw entry " << rec->get_recordID() << "\n";
           delete rec;
           return -1;
         }
         else{ //yparxw kai thelw na eimai exit
           if(currptr->rec_ptr->get_exitDate() == "-"){ //yphrxa xwris exit date
             if((dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "smaller") && (dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "equal"))
-            {delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
+            {/*std::cout << "ERROR do8en exit pro= yparxontos entry " << rec->get_recordID() << "\n";*/delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
             currptr->rec_ptr->set_exitDate(rec->get_exitDate()); //enhmerwse exit date
             delete rec;
             return 3; //ola ok
           }
           else{ //yphrxa me exit date, ftanei. oxi deutero exit
+            //std::cout << "ERROR eimai hdh etoimos " << rec->get_recordID() << "\n";
             delete rec;
             return -1;
           }
@@ -64,27 +67,30 @@ int record_HT::insert_record(record * rec){
       }
       currptr = currptr->next ;
     }//telos while alusida
-    if(currptr->rec_ptr->get_recordID() == rec->get_recordID()) //brethhke idio id, abort mission!
+    if(currptr->rec_ptr->get_recordID() == rec->get_recordID()) //brethhke idio id
     {
       if(rec->get_entryDate() != "-"){ // h eggrafh yparxei kai exei entry. aporriptetai
+        //std::cout << "ERROR yparxw kai den ksanakanw entry " << rec->get_recordID() << "\n";
         delete rec;
         return -1;
       }
       else{ //yparxw kai thelw na eimai exit
         if(currptr->rec_ptr->get_exitDate() == "-"){ //yphrxa xwris exit date
           if((dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "smaller") && (dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "equal"))
-          {delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
+          {/*std::cout << "ERROR do8en exit pro= yparxontos entry " << rec->get_recordID() << "\n";*/delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
           currptr->rec_ptr->set_exitDate(rec->get_exitDate()); //enhmerwse exit date
           delete rec;
           return 3; //ola ok
         }
         else{ //yphrxa me exit date, ftanei. oxi deutero exit
+          //std::cout << "ERROR eimai hdh etoimos " << rec->get_recordID() << "\n";
           delete rec;
           return -1;
         }
       }//telos else gia an eimai exit
     }
-    if(rec->get_entryDate() == "-"){ // h eggrafh den yparxei kai den einai gia EXIT. aporriptetai
+    if(rec->get_entryDate() == "-"){ // h eggrafh den yparxei kai einai gia EXIT. aporriptetai
+      //std::cout << "ERROR den yparxw kai eimai exit " << rec->get_recordID() << "\n";
       delete rec;
       return -1;
     }

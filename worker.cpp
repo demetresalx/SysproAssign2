@@ -20,7 +20,7 @@ void populate_other_HTs(record_HT * rht , diseaseHashTable * dht, countryHashTab
       continue;
     else{
       record_HT_node * currptr = rht->table[i];
-      while(currptr!= NULL){ //paei sto teleutaio. ENDEIKTIKH EKTYPWSH. MONO MERIKA PEDIA ALLA MPORW KAI OLA
+      while(currptr!= NULL){ //paei mexri kai to teleutaio. insert ta records poy exei ekei mesa o rht
         //std::cout << currptr->rec_ptr->get_recordID() << " " << currptr->rec_ptr->get_diseaseID() << " " << currptr->rec_ptr->get_patientFirstName() << " " << currptr->rec_ptr->get_entryDate() << " " <<currptr->rec_ptr->get_exitDate() <<"\n";
         dht->insert_record(currptr->rec_ptr);
         cht->insert_record(currptr->rec_ptr);
@@ -38,9 +38,10 @@ void parse_records_from_file(std::string filename, std::string date, std::string
   if(is_date_ok(date) == false) //an to date onoma arxeiou den einai hmeromhnia, asto
     return;
 
+    //std::cout << " my file is " << filename << "\n";
   while (std::getline(infile, line)){
     //https://stackoverflow.com/questions/49201654/splitting-a-string-with-multiple-delimiters-in-c
-    std::string const delims{ " \t,\r\n" }; //delimiters einai ta: space,tab,comma kai carriage return. TELOS.
+    std::string const delims{ " \t\r\n" }; //delimiters einai ta: space,tab kai carriage return. TELOS.
     size_t beg, pos = 0;
     int params_count =0;
     std::string true_record_parts[8];
@@ -53,7 +54,7 @@ void parse_records_from_file(std::string filename, std::string date, std::string
         params_count++;
     }//telos while eksagwghs gnwrismatwn apo grammh
     if(params_count != 6) //kati leipei/pleonazei, akurh h eggrafh!
-      {/*std::cout<< "BAD rec\n";*/continue;}
+      {std::cout<< "ERROR\n";continue;}
     //fernw thn eggrafh sth morfh ths ergasias 1 gia na einai apodotika kai eukolotera ta queries
     true_record_parts[0] = record_parts[0]; //id
     true_record_parts[1] = record_parts[2]; //first name
@@ -65,14 +66,14 @@ void parse_records_from_file(std::string filename, std::string date, std::string
     else if(record_parts[1] == "EXIT")
       true_record_parts[6] = date; //exitdate to onoma tou arxeiou
     else //kakh eggrafh, aporripsh k sunexeia
-      {/*std::cout<< "BAD rec\n";*/continue;}
+      {std::cout<< "ERROR\n";continue;}
     true_record_parts[7] = record_parts[5]; //age
     record * new_rec_ptr = new record(true_record_parts); //dhmiourgia eggrafhs
     //std::cout << new_rec_ptr->get_recordID() << " " << new_rec_ptr->get_patientFirstName() << " " << new_rec_ptr->get_age() << " " << new_rec_ptr->get_entryDate()<< " " << new_rec_ptr->get_country() << "\n";
     //TO PERNAW STIS DOMES ME ELEGXO GIA EXIT AN YPARXEI KTL!!
     int parsed = rht->insert_record(new_rec_ptr);
     if(parsed < 0)
-      continue; //den egine insert gt exei problhma, pame epomenh
+      {std::cout<< "ERROR\n";} //den egine insert gt exei problhma, pame epomenh
 
   }//telos while diabasmatos arxeiou, pername tis eggrafes stous alloues 2HT ths askhshs 1
 
@@ -102,6 +103,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       receive_string(read_fd, &(countries[i]), bsize ); //pairnw prwta xwra
       receive_string(read_fd, sbuf, bsize ); //pairnw olo to path
       extract_files(sbuf, &n_files, &date_files); //pairnw plhrofories
+      sort_files(date_files,0 ,n_files-1); //sort by date gia pio swsto parsing
       for(int j=0; j<n_files; j++){
         strcpy(jbuf, "");
         sprintf(jbuf, "%s/%s",sbuf, (date_files[j]).c_str());

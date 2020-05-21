@@ -19,6 +19,8 @@ int receive_string(int, std::string *,int);
 
 //gia na pairnw ta files h ta directories poy yparxoyn se ena path
 int extract_files(char * , int * , std::string **);
+//gia na sortarw ta file names vasei mias quicksort
+void sort_files(std::string * , int , int );
 
 //h hash function moy gia hash tables
 unsigned hash_str(std::string );

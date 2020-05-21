@@ -241,3 +241,42 @@ bool is_date_ok(std::string dato){
   }
   return false;
 }
+
+
+//sortarisma arxeiwn me quicksort, prosarmosmenh sthn askhsh (strings)
+//https://www.geeksforgeeks.org/quick-sort/
+int partition (std::string * filen, int low, int high)
+{
+    std::string pivot = filen[high]; // pivot
+    int i = (low - 1); // Index of smaller element
+
+    for (int j = low; j <= high - 1; j++)
+    {
+        // If current element is smaller than the pivot
+        if(dates_compare(filen[j], pivot) == "smaller")
+        {
+            i++; // increment index of smaller element, swap
+            std::string temp = filen[i];
+            filen[i] = filen[j];
+            filen[j] = temp;
+        }
+    }
+    std::string temp = filen[i+1];
+    filen[i+1] = filen[high];
+    filen[high] = temp;
+    return (i + 1);
+}
+
+void sort_files(std::string * filesn , int low, int high){
+  if (low < high)
+    {
+        /* pi is partitioning index, arr[p] is now
+        at right place */
+        int pi = partition(filesn, low, high);
+
+        // Separately sort elements before
+        // partition and after partition
+        sort_files(filesn, low, pi - 1);
+        sort_files(filesn, pi + 1, high);
+    }
+}
