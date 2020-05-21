@@ -171,7 +171,9 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           rdb = receive_string(read_fd, &date1, bsize); //diabase date1
           std::string date2;
           rdb = receive_string(read_fd, &date2, bsize); //diabase date2
-          printf("i am %d and i got %s\n", getpid(),dis_name.c_str() );
+          int number_to_present = diseases_htable.total_recs_for_cat(dis_name, date1, date2);
+          //std::cout << dis_name << " ^ " << number_to_present << "\n";
+          write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
         }
         else if(tool == "/diseaseFrequency2"){ //ME orisma country
           std::string dis_name;
@@ -182,7 +184,9 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           rdb = receive_string(read_fd, &date2, bsize); //diabase date2
           std::string country;
           rdb = receive_string(read_fd, &country, bsize); //diabase date2
-          printf("i am %d and i got %s and %s\n", getpid(),dis_name.c_str(), country.c_str() );
+          int number_to_present = diseases_htable.total_recs_for_cat(dis_name, date1, date2, country);
+          //std::cout << dis_name << " ^ " << number_to_present << "\n";
+          write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
         }
         else{
           std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";

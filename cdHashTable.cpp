@@ -220,13 +220,13 @@ void diseaseHashTable::numCurrentPatients(std::string disease){
 }//telos sunarthshs
 
 //gia to diseaseFrequency xwris country
-void diseaseHashTable::total_recs_for_cat(std::string diseasename, std::string date1, std::string date2){
+int diseaseHashTable::total_recs_for_cat(std::string diseasename, std::string date1, std::string date2){
   unsigned hval = hash_str(diseasename); //hasharei to diseaseID
   hval = hval % size; //gia na pame sth swsth thesh pinaka
 
   if(table[hval] == NULL){ //Auth h periptwsh de tha ginei pote sthn askhsh
-    std::cout <<  diseasename << " " << 0 << "\n";
-    return;
+    //std::cout <<  diseasename << " " << 0 << "\n";
+    return 0;
   }
   else{
     chain_node * currptr = table[hval];
@@ -241,26 +241,26 @@ void diseaseHashTable::total_recs_for_cat(std::string diseasename, std::string d
           //twra o container exei oles tis eggrafes ths astheneias/xwras me entrydate <= date2. H parakatw entolh ftiaxnei kai thn allh proypothesh
           buroku[i].tree_ptr->collect_dated_reclists(buroku[i].tree_ptr, date2, &querycontainer); //o container exei tis eggrafes gia authn thn astheneia/xwra me entrydate <= Date2. Ekmetalleuetai th dendrikh domh gia kalyterh polyplokothta
           int number_to_present = querycontainer.count_exit_limit(date1);
-          std::cout << *(buroku[i].dis_name_ptr) << " " << number_to_present << "\n";
-          return;
+          //std::cout << *(buroku[i].dis_name_ptr) << " " << number_to_present << "\n";
+          return number_to_present;
         }
       }//telos for gia block
       currptr = currptr->next ;
     }//telos while gia orizontia lista
 
   }//telos else
-  std::cout << diseasename << " " << 0 << "\n";
-  return;
+  //std::cout << diseasename << " " << 0 << "\n";
+  return 0;
 }
 
 //gia to diseaseFrequency ME country
-void diseaseHashTable::total_recs_for_cat(std::string diseasename, std::string date1, std::string date2, std::string country){
+int diseaseHashTable::total_recs_for_cat(std::string diseasename, std::string date1, std::string date2, std::string country){
   unsigned hval = hash_str(diseasename); //hasharei to diseaseID
   hval = hval % size; //gia na pame sth swsth thesh pinaka
 
   if(table[hval] == NULL){ //Auth h periptwsh de tha ginei pote sthn askhsh
-    std::cout << diseasename << " " << 0 << "\n";
-    return;
+    //std::cout << diseasename << " " << 0 << "\n";
+    return 0;
   }
   else{
     chain_node * currptr = table[hval];
@@ -275,16 +275,16 @@ void diseaseHashTable::total_recs_for_cat(std::string diseasename, std::string d
           //twra o container exei oles tis eggrafes ths astheneias/xwras me entrydate <= date2. H parakatw entolh ftiaxnei kai thn allh proypothesh
           buroku[i].tree_ptr->collect_dated_reclists(buroku[i].tree_ptr, date2, &querycontainer); //o container exei tis eggrafes gia authn thn astheneia/xwra me entrydate <= Date2. Ekmetalleuetai th dendrikh domh gia kalyterh polyplokothta
           int number_to_present = querycontainer.count_exit_limit(date1, country);
-          std::cout << *(buroku[i].dis_name_ptr) << " " << number_to_present << "\n";
-          return;
+          //std::cout << *(buroku[i].dis_name_ptr) << " " << number_to_present << "\n";
+          return number_to_present;
         }
       }//telos for gia block
       currptr = currptr->next ;
     }//telos while gia orizontia lista
 
   }//telos else
-  std::cout <<  diseasename << " " << 0 << "\n";
-  return;
+  //std::cout <<  diseasename << " " << 0 << "\n";
+  return 0;
 }
 
 //gia topk XWRIS date1 date2

@@ -89,7 +89,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   if(glob_counter ==wnum)
     std::cout << "parsing donezo!\n";
 
-  //std::cout << "ola ok!\n";
+  //ARXIZOUN OI ENTOLES
   std::string line;
 
   while(getline(std::cin, line)){
@@ -128,6 +128,14 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
               send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
               send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
             }
+            //pare apanthsh
+            int intreader=0;
+            int intreader2=0;
+            for(int i=0; i<wnum; i++){ //pare ton arithmo
+                read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+                intreader2 += intreader;
+            }
+            std::cout << intreader2 << "\n";
           }
           else if(ind ==5){ //me proairetiko orisma country
             if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
@@ -146,6 +154,14 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
               send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
               send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile country
             }
+            //pare apanthsh
+            int intreader=0;
+            int intreader2=0;
+            for(int i=0; i<wnum; i++){ //pare ton arithmo
+                read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+                intreader2 += intreader;
+            }
+            std::cout << intreader2 << "\n";
           }
           else{//ekana lathos sthn entolh
             std::cout << "Lathos sta orismata. try again...\n";
@@ -162,25 +178,14 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     }//telos else gia to an einai nonexit entolh
 
 
-
-
-
-    //diabase apo paidi
-
-      /*for(int i=0; i<wnum; i++){
-        //std::cout << "iam par and i will rd blck\n";
-        //pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY);
-        //read(pipe_fds[2*i].fd, but, bsize);
-        receive_string(pipe_fds[2*i].fd, &tool, bsize);
-        std::cout << "diabasa apo paidi " << tool << "\n";
-        //close(pipe_fds[2*i].fd);
-      }*/
+    //diabase apo paidi gia apanthseis, sumfwna me to prwtokollo ths ka8e mias
 
 
 
 
 
-  }
+
+  }//telos while poy diabazei entoles
 
   //sleep(5);
   for(int i=0; i<wnum; i++){
