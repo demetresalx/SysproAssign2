@@ -15,6 +15,7 @@
 
 int summary_entries =0;
 
+//DE THA XREIASTEI
 //pernaei telika tis eggrafes kai stous allous HT afou exoun ginei oi elegxoi
 void populate_other_HTs(record_HT * rht , diseaseHashTable * dht, countryHashTable * cht){
   for(unsigned int i=0; i<rht->size; i++){
@@ -34,7 +35,7 @@ void populate_other_HTs(record_HT * rht , diseaseHashTable * dht, countryHashTab
 }
 
 //diabazei arxeio kai kanei populate tis domes (apo 1h ergasia oi perissoteres)
-void parse_records_from_file(std::string filename, std::string date, std::string folder, record_HT * rht, file_summary* summ){
+void parse_records_from_file(std::string filename, std::string date, std::string folder, record_HT * rht, diseaseHashTable * dht, countryHashTable *cht,file_summary* summ){
   std::ifstream infile(filename.c_str()); //diabasma apo tis grammes tou arxeiou
   std::string line; //EPITREPETAI H STRING EIPAN STO PIAZZA
   if(is_date_ok(date) == false) //an to date onoma arxeiou den einai hmeromhnia, asto
@@ -78,6 +79,10 @@ void parse_records_from_file(std::string filename, std::string date, std::string
     int parsed = rht->insert_record(new_rec_ptr);
     if(parsed < 0)
       {std::cout<< "ERROR\n";continue;} //den egine insert gt exei problhma, pame epomenh
+    if(parsed != 3){
+      dht->insert_record(new_rec_ptr);
+      cht->insert_record(new_rec_ptr);
+    }
     //PAME na perasoume thn plhroforia poy phrame sth domh summary
     if(summ->insert_data(true_record_parts) == 1)
       summary_entries += 1; //mphke kainourgia astheneia
@@ -116,7 +121,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
         file_summary * mysum = new file_summary; //boh8htikh domh gia to summary poy tha stelnei meta apo kathe arxeio sto gonio
         strcpy(jbuf, "");
         sprintf(jbuf, "%s/%s",sbuf, (date_files[j]).c_str());
-        parse_records_from_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable, mysum);
+        parse_records_from_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable, &diseases_htable, &countries_htable ,mysum);
         delete mysum;
       }
 
@@ -125,7 +130,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
     }
     //close(read_fd); //to afhnw anoixto
     delete[] countries; //svhse to new poy egine
-    populate_other_HTs(&records_htable, &diseases_htable, &countries_htable); //perna tis eggrafes sou kai stous allous 2 pinakes askhshs 1
+    //populate_other_HTs(&records_htable, &diseases_htable, &countries_htable); //perna tis eggrafes sou kai stous allous 2 pinakes askhshs 1
     //records_htable.print_contents();
     //diseases_htable.print_contents();
     //countries_htable.print_contents();

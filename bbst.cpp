@@ -140,7 +140,7 @@ void reclist::print_contents(){
   std::cout << "\t eimai h lista ston komvo t dentrou kai exw ta: ";
   reclist * currptr = this;
   while(currptr != NULL){ //paei mexri to telos
-    std::cout << currptr->recptr->get_patientFirstName() << " ";
+    std::cout << currptr->recptr->get_patientFirstName() << currptr->recptr->get_exitDate() << "# ";
     currptr = currptr->next ;
   }//telos while gia next
   std::cout << "\n";
