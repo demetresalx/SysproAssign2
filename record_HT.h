@@ -30,7 +30,7 @@ class record_HT{ // o HT
 
     void print_contents();
     record * recordPatientExit(std::string ,std::string , std::string * ); //gia to antistoixo erwthma
-
+    record * searchPatientRecord(std::string ); //gia to sxetiko erwthma basei ID
 };
 
 

@@ -79,7 +79,7 @@ void parse_records_from_file(std::string filename, std::string date, std::string
     int parsed = rht->insert_record(new_rec_ptr);
     if(parsed < 0)
       {std::cout<< "ERROR\n";continue;} //den egine insert gt exei problhma, pame epomenh
-    if(parsed != 3){
+    if(parsed != 3){ //an htan pragmati entelws nea eggrafh, kane insert. Diaforetika, epeidh ola ta insert ginontai me pointers, h enhmerwsh ths hmeromhnias sto recordHT arkei kai gia auta (giati deixnoun sthn eggrafh auth)
       dht->insert_record(new_rec_ptr);
       cht->insert_record(new_rec_ptr);
     }
@@ -129,7 +129,6 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       delete[] date_files; //sbhse to new poy egine
     }
     //close(read_fd); //to afhnw anoixto
-    delete[] countries; //svhse to new poy egine
     //populate_other_HTs(&records_htable, &diseases_htable, &countries_htable); //perna tis eggrafes sou kai stous allous 2 pinakes askhshs 1
     //records_htable.print_contents();
     //diseases_htable.print_contents();
@@ -151,6 +150,8 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   std::string tool;
 
   //arxizw na pairnw entols xrhsth
+  int successful = 0; //epituxh erwthmata
+  int failed = 0; //apotuxhmena erwthmata
   while(1){
 
 
@@ -167,7 +168,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           break;
         }
         else if(tool == "bad"){
-          ;;//send_string(write_fd, "meow", bsize);
+          failed++;//apotyxhmeno erwthma
         }
         else if(tool == "/diseaseFrequency1"){ //xwris orisma country
           std::string dis_name;
@@ -179,7 +180,8 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           int number_to_present = diseases_htable.total_recs_for_cat(dis_name, date1, date2);
           //std::cout << dis_name << " ^ " << number_to_present << "\n";
           write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
-        }
+          successful++;//epituxia
+        }//telos if diseaseFrequency1
         else if(tool == "/diseaseFrequency2"){ //ME orisma country
           std::string dis_name;
           rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
@@ -192,7 +194,33 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           int number_to_present = diseases_htable.total_recs_for_cat(dis_name, date1, date2, country);
           //std::cout << dis_name << " ^ " << number_to_present << "\n";
           write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
-        }
+          successful++; //epituxia
+        }//telos if diseaseFrequency2
+        else if(tool == "/listCountries"){
+          write(write_fd, &n_dirs, sizeof(int)); //stelnw sto gonio poses xwres tha exw
+          for(int i=0; i<n_dirs; i++){
+            std::string countryandme = countries[i] + " " + std::to_string(getpid());
+            send_string(write_fd, &countryandme, bsize);
+          }
+          successful++;//epituxia
+        }//telos if listCountries
+        else if(tool == "/searchPatientRecord"){
+          std::string id_to_look_for = "";
+          record * recptr = NULL; //gia ton entopismo eggrafhs
+          rdb = receive_string(read_fd, &id_to_look_for, bsize); //diabase to zhtoumeno id
+          recptr = records_htable.searchPatientRecord(id_to_look_for); //psaksto
+          if(recptr != NULL){ //an to brhke
+            std::string requested_rec = "";
+            if(recptr->get_exitDate() == "-") //den exoume bgei akoma, h ekfwnhs den kserw giati thelei 2 paules anti gia 1 alla ok
+              requested_rec = recptr->get_recordID() + " " + recptr->get_patientFirstName() + " " + recptr->get_patientLastName() + " " + recptr->get_diseaseID() + " " + std::to_string(recptr->get_age()) + " " + recptr->get_entryDate() + " --" ;
+            else //exei kanoniko exitdate
+              requested_rec = recptr->get_recordID() + " " + recptr->get_patientFirstName() + " " + recptr->get_patientLastName() + " " + recptr->get_diseaseID() + " " + std::to_string(recptr->get_age()) + " " + recptr->get_entryDate() + " " + recptr->get_exitDate() ;
+            send_string(write_fd, &requested_rec, bsize); //grapsto
+          }
+          else //den to brhke
+            send_string(write_fd, "nope", bsize); //grapse oti de brhkes tpt
+          successful++;//epituxia
+        }//telos if searchPatientRecord
         else{
           std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
         }
@@ -200,6 +228,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
 
   }
 
+  delete[] countries; //svhse to new poy egine
 
 
   close(read_fd);

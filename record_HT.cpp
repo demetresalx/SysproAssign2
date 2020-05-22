@@ -173,3 +173,27 @@ record * record_HT::recordPatientExit(std::string recid, std::string exitd , std
   return NULL; //egine ok, return 0
 
 }//telos sunarthshs
+
+//sunarthsh gia to omwnymo erwthma
+record * record_HT::searchPatientRecord(std::string recid){
+  unsigned hval = hash_str(recid); //hasharei to recordID
+  hval = hval % size; //gia na pame sth swsth thesh pinaka
+
+  if(table[hval] == NULL){ //ean den yparxei alusida ekei, den yparxei h eggrafh
+    return NULL;
+  }
+  else{ //yparxei alusida, pame na broume to id an yparxei
+    record_HT_node * currptr = table[hval];
+    while(currptr->next != NULL){ //paei sto teleutaio
+
+      if(currptr->rec_ptr->get_recordID() == recid){ //to brhkame
+        return currptr->rec_ptr;
+      }//telos if brhkame thn eggrafh
+      currptr = currptr->next ;
+    }//telos while
+    if(currptr->rec_ptr->get_recordID() == recid){ //to brhkame
+      return currptr->rec_ptr;
+    }//telos if brhkame thn eggrafh
+  }//telos else yparxei alysida
+  return NULL; //egine ok, return 0
+}

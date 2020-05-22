@@ -91,6 +91,8 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
   //ARXIZOUN OI ENTOLES
   std::string line;
+  int failed=0;
+  int successful=0;
 
   while(getline(std::cin, line)){
     //std::cout << "line is " << line << "\n";
@@ -136,6 +138,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
                 intreader2 += intreader;
             }
             std::cout << intreader2 << "\n";
+            successful++;//epituxia
           }
           else if(ind ==5){ //me proairetiko orisma country
             if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
@@ -162,19 +165,73 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
                 intreader2 += intreader;
             }
             std::cout << intreader2 << "\n";
+            successful++;//epituxia
           }
           else{//ekana lathos sthn entolh
             std::cout << "Lathos sta orismata. try again...\n";
             for(int i=0; i<wnum; i++)
               send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
           }
+      }//telos if diseaseFrequency
+      else if(requ[0] == "/listCountries"){
+        if(ind == 1){
+          //steile to aithma sta paidia
+          for(int i=0; i<wnum; i++)
+            send_string(pipe_fds[2*i +1].fd, "/listCountries", bsize);
 
-      }//telos if gia to poia kai pws einai h nonexit entolh
+          //pare tis apanthseis tous
+          std::string countryandchild = "";
+          int countries_per_child =0;
+          for(int i=0; i<wnum; i++){
+            read(pipe_fds[2*i].fd, &countries_per_child, sizeof(int));
+            for(int j=0; j< countries_per_child; j++){
+              receive_string(pipe_fds[2*i].fd, &countryandchild ,bsize);
+              std::cout << countryandchild << "\n";
+            }//telos for gia kathe xwra tou paidiou
+          }//telos for gia kathe paidi
+          successful++;//epituxia
+        }//telos if an einai swsta h entolh
+        else{//ekana lathos sthn entolh
+          std::cout << "Lathos sta orismata. try again...\n";
+          for(int i=0; i<wnum; i++)
+            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+          failed++;//apotuxia
+        }
+
+      }//telos if listCountries
+      else if(requ[0] == "/searchPatientRecord"){
+        if(ind == 2){ //apodektos arithmos orismatwn
+          //steile to aithma sta paidia
+          for(int i=0; i<wnum; i++){
+            send_string(pipe_fds[2*i +1].fd, "/searchPatientRecord", bsize);
+            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize); //steile to id pros anazhthsh
+          }
+          //pare tis apanthseis
+          std::string requested_record = "";
+          for(int i=0; i<wnum; i++){
+            receive_string(pipe_fds[2*i].fd, &requested_record ,bsize);
+            if(requested_record == "nope")
+              continue;
+            else
+              std::cout << requested_record << "\n";
+          }
+          successful++;//epituxia
+        }
+        else{//ekana lathos sthn entolh
+          std::cout << "Lathos sta orismata. try again...\n";
+          for(int i=0; i<wnum; i++)
+            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+          failed++;//apotuxia
+        }
+
+      }//telos searchPatientRecord
       else{
         std::cout << "kakws orismenh entolh\n";
         for(int i=0; i<wnum; i++)
           send_string(pipe_fds[2*i +1].fd, "bad", bsize);
-      }
+        failed++;//apotuxia
+      }//telos if gia to poia kai pws einai h nonexit entolh
     }//telos else gia to an einai nonexit entolh
 
 
