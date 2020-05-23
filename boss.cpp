@@ -271,6 +271,9 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile date1
             send_string(pipe_fds[2*i +1].fd, &requ[5], bsize);//steile date2
           }
+          //pare kai ektupwse ta apotelesmata
+          for(int i=0; i<wnum; i++)
+            read_and_present_topk(pipe_fds[2*i].fd);
           successful++;//epituxia
         }
         else{//ekana lathos sthn entolh
@@ -306,4 +309,29 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   }
 
 return 0;
+}
+
+//pare kai parousiase ta apotelesmata topk apo ena pipe paidiou
+void read_and_present_topk(int rfd){
+  int fetched=0;
+  read(rfd, &fetched, sizeof(int));
+  if(fetched ==0) //to paidi auto den exei tpt. mh sunexiseis
+    return;
+
+  int age_cat;
+  int krousmata;
+  std::string onoma_kat = "";
+  //diabazw ta topk tou paidiou (mono ena paidi tha einai)
+  for(int i=0; i< fetched; i++){
+    read(rfd, &age_cat, sizeof(int)); //pare omada hlikias
+    read(rfd, &krousmata, sizeof(int)); //pare krousmata
+    if(age_cat == 0)
+      std::cout << "0-20: " << krousmata << "\n";
+    else if(age_cat == 1)
+      std::cout << "21-40: " << krousmata << "\n";
+    else if(age_cat == 2)
+      std::cout << "41-60: " << krousmata << "\n";
+    else
+      std::cout << "60+: " << krousmata << "\n";
+  }
 }

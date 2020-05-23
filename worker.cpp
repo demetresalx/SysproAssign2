@@ -57,7 +57,7 @@ void parse_records_from_file(std::string filename, std::string date, std::string
         params_count++;
     }//telos while eksagwghs gnwrismatwn apo grammh
     if(params_count != 6) //kati leipei/pleonazei, akurh h eggrafh!
-      {std::cout<< "ERROR\n";continue;}
+      {std::cerr << "ERROR\n";continue;}
     //fernw thn eggrafh sth morfh ths ergasias 1 gia na einai apodotika kai eukolotera ta queries
     true_record_parts[0] = record_parts[0]; //id
     true_record_parts[1] = record_parts[2]; //first name
@@ -69,16 +69,16 @@ void parse_records_from_file(std::string filename, std::string date, std::string
     else if(record_parts[1] == "EXIT")
       true_record_parts[6] = date; //exitdate to onoma tou arxeiou
     else //kakh eggrafh, aporripsh k sunexeia
-      {std::cout<< "ERROR\n";continue;}
+      {std::cerr << "ERROR\n";continue;}
     true_record_parts[7] = record_parts[5]; //age
     if(stoi(true_record_parts[7]) < 0)//arnhtiko age, proxwrame
-      {std::cout<< "ERROR\n";continue;}
+      {std::cerr << "ERROR\n";continue;}
     record * new_rec_ptr = new record(true_record_parts); //dhmiourgia eggrafhs
     //std::cout << new_rec_ptr->get_recordID() << " " << new_rec_ptr->get_patientFirstName() << " " << new_rec_ptr->get_age() << " " << new_rec_ptr->get_entryDate()<< " " << new_rec_ptr->get_country() << "\n";
     //TO PERNAW STIS DOMES ME ELEGXO GIA EXIT AN YPARXEI KTL!!
     int parsed = rht->insert_record(new_rec_ptr);
     if(parsed < 0)
-      {std::cout<< "ERROR\n";continue;} //den egine insert gt exei problhma, pame epomenh
+      {std::cerr << "ERROR\n";continue;} //den egine insert gt exei problhma, pame epomenh
     if(parsed != 3){ //an htan pragmati entelws nea eggrafh, kane insert. Diaforetika, epeidh ola ta insert ginontai me pointers, h enhmerwsh ths hmeromhnias sto recordHT arkei kai gia auta (giati deixnoun sthn eggrafh auth)
       dht->insert_record(new_rec_ptr);
       cht->insert_record(new_rec_ptr);
@@ -232,7 +232,11 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           rdb = receive_string(read_fd, &date1, bsize); //diabase date1
           std::string date2;
           rdb = receive_string(read_fd, &date2, bsize); //diabase date2
-          countries_htable.topk_age_ranges(kapa, country, disease, date1, date2);
+          int fetched=0;
+          int * resul_arr = new int[2*kapa]; //me boh8aei na perasw ston patera ta apotelesmata
+          countries_htable.topk_age_ranges(kapa, country, disease, date1, date2, &fetched, resul_arr);
+          deliver_topk(write_fd, fetched, resul_arr); //steile apotelesmata ston patera
+          delete[] resul_arr;
         }//telos topk
         else{
           std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
@@ -248,6 +252,21 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   close(write_fd);
   //std::cout << "eftasa\n";
   return 0;
+
+
+}
+
+//stelnei ston patera apotelesmata topk
+void deliver_topk(int wfd, int fetchd, int * res_arr){
+  write(wfd, &fetchd, sizeof(int)); //enhmerwse ton patera na kserei ti na perimenei na diabasei
+  if(fetchd == 0) //tipota
+    return;
+
+  for(int i=0; i< fetchd; i++){
+    write(wfd, &res_arr[2*i], sizeof(int)); //hlikiakh kathgoria
+    write(wfd, &res_arr[2*i +1], sizeof(int)); //krousmata ths
+
+  }
 
 
 }

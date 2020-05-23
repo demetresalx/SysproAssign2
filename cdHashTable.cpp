@@ -498,12 +498,13 @@ void countryHashTable::topk_diseases(int k, std::string country, std::string dat
 
 
 //omwnymo erwthma gia ta topk-askhshs 2 (age ranges)
-void countryHashTable::topk_age_ranges(int k, std::string country, std::string disease, std::string date1, std::string date2){
+int countryHashTable::topk_age_ranges(int k, std::string country, std::string disease, std::string date1, std::string date2, int * fetched, int * resu_array){
+  *fetched=0;//posa brhka
   unsigned hval = hash_str(country); //hasharei to country
   hval = hval % size; //gia na pame sth swsth thesh pinaka
   if(table[hval] == NULL){ //ean den yparxei alusida ekei, den yparxei h xwra
-    std::cout << "Country specified does not exist (yet).\n";
-    return;
+    //std::cout << "Country specified does not exist (yet).\n";
+    return -1;
   }
   else{ //h xwra yparxei
     chain_node * currptr = table[hval];
@@ -530,17 +531,20 @@ void countryHashTable::topk_age_ranges(int k, std::string country, std::string d
               continue;
             }
             heapnode ophelia(mheap.extract() ); //eksagwgh rizas apo swro kai diathrhsh
-            std::cout << ophelia.cat_name << " " << ophelia.krousmata << "\n";
+            //std::cout << ophelia.cat_name << " " << ophelia.krousmata << "\n";
+            resu_array[2*(*fetched)] = std::stoi(ophelia.cat_name); //krata hlikiakh kathgoria
+            resu_array[2*(*fetched) +1] = ophelia.krousmata; //krata arithmo krousmatwn sthn epomenh thesh
+            *fetched +=1;
           }//telos for ektypwshs topk
-          return;
+          return 1;
         }//telos if brethhke xwra
       }//telos for gia block
       currptr = currptr->next ;
     }//telos while gia orizontia lista
 
   }//telos else
-  std::cout << "Country specified does not exist (yet).\n";
-
+  //std::cout << "Country specified does not exist (yet).\n";
+  return -1;
 }
 
 

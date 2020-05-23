@@ -31,6 +31,7 @@ std::string dates_compare(std::string , std::string );
 //elegxei an ena date einai ok
 bool is_date_ok(std::string );
 
+//se poia kathgoria anhkei enas int
 int get_age_category(int );
 
 //boh8htikh domh gia to summary. anaferetai se dedomena enos arxeiou ana io
@@ -46,5 +47,7 @@ public:
   int insert_data(std::string * ); //enhmerwnei tis metavlhtes poy prepei apo ta merh enos record
   void print_contents();
 };
+
+
 
 #endif
