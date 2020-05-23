@@ -233,9 +233,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           std::string date2;
           rdb = receive_string(read_fd, &date2, bsize); //diabase date2
           int fetched=0;
-          int * resul_arr = new int[2*kapa]; //me boh8aei na perasw ston patera ta apotelesmata
-          countries_htable.topk_age_ranges(kapa, country, disease, date1, date2, &fetched, resul_arr);
-          deliver_topk(write_fd, fetched, resul_arr); //steile apotelesmata ston patera
+          int * resul_arr = new int[kapa]; //me boh8aei na perasw ston patera ta apotelesmata
+          float * fresul_arr = new float[kapa]; //gia ta pososta
+          countries_htable.topk_age_ranges(kapa, country, disease, date1, date2, &fetched, resul_arr, fresul_arr);
+          deliver_topk(write_fd, fetched, resul_arr, fresul_arr); //steile apotelesmata ston patera
           delete[] resul_arr;
         }//telos topk
         else{
@@ -257,14 +258,14 @@ int work(char * read_pipe, char * write_pipe, int bsize){
 }
 
 //stelnei ston patera apotelesmata topk
-void deliver_topk(int wfd, int fetchd, int * res_arr){
+void deliver_topk(int wfd, int fetchd, int * res_arr, float * fres_arr){
   write(wfd, &fetchd, sizeof(int)); //enhmerwse ton patera na kserei ti na perimenei na diabasei
   if(fetchd == 0) //tipota
     return;
 
   for(int i=0; i< fetchd; i++){
-    write(wfd, &res_arr[2*i], sizeof(int)); //hlikiakh kathgoria
-    write(wfd, &res_arr[2*i +1], sizeof(int)); //krousmata ths
+    write(wfd, &res_arr[i], sizeof(int)); //hlikiakh kathgoria
+    write(wfd, &fres_arr[i], sizeof(float)); //pososto krousmatwn ths
 
   }
 

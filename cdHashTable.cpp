@@ -498,7 +498,7 @@ void countryHashTable::topk_diseases(int k, std::string country, std::string dat
 
 
 //omwnymo erwthma gia ta topk-askhshs 2 (age ranges)
-int countryHashTable::topk_age_ranges(int k, std::string country, std::string disease, std::string date1, std::string date2, int * fetched, int * resu_array){
+int countryHashTable::topk_age_ranges(int k, std::string country, std::string disease, std::string date1, std::string date2, int * fetched, int * resu_array, float * fresu_array){
   *fetched=0;//posa brhka
   unsigned hval = hash_str(country); //hasharei to country
   hval = hval % size; //gia na pame sth swsth thesh pinaka
@@ -532,8 +532,8 @@ int countryHashTable::topk_age_ranges(int k, std::string country, std::string di
             }
             heapnode ophelia(mheap.extract() ); //eksagwgh rizas apo swro kai diathrhsh
             //std::cout << ophelia.cat_name << " " << ophelia.krousmata << "\n";
-            resu_array[2*(*fetched)] = std::stoi(ophelia.cat_name); //krata hlikiakh kathgoria
-            resu_array[2*(*fetched) +1] = ophelia.krousmata; //krata arithmo krousmatwn sthn epomenh thesh
+            resu_array[*fetched] = std::stoi(ophelia.cat_name); //krata hlikiakh kathgoria
+            fresu_array[(*fetched)] = ophelia.pososto; //krata pososto twn krousmatwn
             *fetched +=1;
           }//telos for ektypwshs topk
           return 1;

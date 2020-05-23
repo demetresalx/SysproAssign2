@@ -13,6 +13,7 @@ public:
 
   std::string cat_name; //onoma xwras h astheneias
   int krousmata; //arithmos krousmatwn
+  float pososto; //gia topk
 
 
   heapnode();
@@ -31,7 +32,7 @@ public:
   maxBinaryHeap();
   maxBinaryHeap(int); //total gia maxsize
   ~maxBinaryHeap();
-  void insert(std::string , int ); //arrwstia/xwra kai arithmos krousmatwn
+  void insert(std::string , int , float); //arrwstia/xwra kai arithmos krousmatwn kai pososto
   heapnode extract(); //bgazei th root kai kanei maintain
 };
 
@@ -41,6 +42,7 @@ public:
   simple_cd_HT_node * next; //deikths ston epomeno komvo
   std::string cd_name; //kwdikos hlikiakhs kathgorias
   int krousmata; //arithmos krousmatwn
+  float pososto; //gia topk
 
   simple_cd_HT_node(){ next = NULL; krousmata =0;}; //enas empty constructor
   //simple_cd_HT_node(record * ); //constructor basei eggrafhs
@@ -53,6 +55,7 @@ class simple_cd_HT{
 public:
   int size; //megethos pinaka. tha einai iso me h1+h2
   simple_cd_HT_node ** table; //ena array poy apoteleitai apo listes eggrafwn (buckets).
+  int sunolika; //gia na bgei pososto sto topk
 
   simple_cd_HT(){}; //enas empty contrusctor
   simple_cd_HT(int); //enas constructor me orisma size

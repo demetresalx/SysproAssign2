@@ -68,7 +68,7 @@ public:
   int insert_record(record * );
   void topk_diseases(int , std::string ); //antistoixo erwthma
   void topk_diseases(int , std::string , std::string, std::string ); //antistoixo erwthma me date1 k date2
-  int topk_age_ranges(int , std::string , std::string, std::string , std::string , int *, int *); //omwnymo erwthma
+  int topk_age_ranges(int , std::string , std::string, std::string , std::string , int *, int *, float *); //omwnymo erwthma
 
 };
 

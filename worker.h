@@ -5,7 +5,7 @@
 int work(char *, char *, int );
 
 //stelnei ta apotelesmata ths topk ston patera
-void deliver_topk(int , int, int * );
+void deliver_topk(int , int, int * , float *);
 
 
 #endif

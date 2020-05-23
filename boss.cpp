@@ -312,6 +312,7 @@ return 0;
 }
 
 //pare kai parousiase ta apotelesmata topk apo ena pipe paidiou
+//GIA THN EKTYPWSH POSOSTWN EVALA 0 DEKADIKA PSHFIA GIATI ETSI EINAI STHN EKFWNHSH
 void read_and_present_topk(int rfd){
   int fetched=0;
   read(rfd, &fetched, sizeof(int));
@@ -319,19 +320,19 @@ void read_and_present_topk(int rfd){
     return;
 
   int age_cat;
-  int krousmata;
+  float pososto;
   std::string onoma_kat = "";
   //diabazw ta topk tou paidiou (mono ena paidi tha einai)
   for(int i=0; i< fetched; i++){
     read(rfd, &age_cat, sizeof(int)); //pare omada hlikias
-    read(rfd, &krousmata, sizeof(int)); //pare krousmata
+    read(rfd, &pososto, sizeof(float)); //pare pososto
     if(age_cat == 0)
-      std::cout << "0-20: " << krousmata << "\n";
+      printf("0-20: %.0f%\n",pososto*100);
     else if(age_cat == 1)
-      std::cout << "21-40: " << krousmata << "\n";
+      printf("21-40: %.0f%\n",pososto*100);
     else if(age_cat == 2)
-      std::cout << "41-60: " << krousmata << "\n";
+      printf("41-60: %.0f%\n",pososto*100);
     else
-      std::cout << "60+: " << krousmata << "\n";
+      printf("60+: %.0f%\n",pososto*100);
   }
 }

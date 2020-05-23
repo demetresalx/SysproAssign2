@@ -28,10 +28,13 @@ void swap_nodes_info(heapnode * node1, heapnode * node2){
   heapnode temp;
   temp.cat_name = node1->cat_name;
   temp.krousmata = node1->krousmata;
+  temp.pososto = node1->pososto;
   node1->cat_name = node2->cat_name;
   node1->krousmata = node2->krousmata;
+  node1->pososto = node2->pososto;
   node2->cat_name = temp.cat_name;
   node2->krousmata = temp.krousmata;
+  node2->pososto = temp.pososto;
 }
 
 //apofasizei gia to swimdown
@@ -78,11 +81,12 @@ maxBinaryHeap::~maxBinaryHeap(){
 
 //vazei sto heap ena zeugos xwra/astheneia - arithmo krousmatwn
 //DE GINETAI NA EMFANISTEI H IDIA ASTHENEIA/XWRA DYO FORES GIATI INSERT APO HASH TABLE ME KLEIDI AUTO
-void maxBinaryHeap::insert(std::string cntdis, int numofkrousmata){
+void maxBinaryHeap::insert(std::string cntdis, int numofkrousmata, float posost){
   if(root == NULL){ //prwto stoixeio sto heap
     root = new heapnode();
     root->cat_name = cntdis;
     root->krousmata = numofkrousmata;
+    root->pososto = posost;
     number_of_nodes++; //anebainei o arithmos komvwn tou heap
     latest = root;
     return;
@@ -106,6 +110,7 @@ void maxBinaryHeap::insert(std::string cntdis, int numofkrousmata){
           currnode->right = new heapnode();
           currnode->right->cat_name = cntdis;
           currnode->right->krousmata = numofkrousmata;
+          currnode->right->pososto = posost;
           currnode->right->parent = currnode;
           latest = currnode->right;
           number_of_nodes++;
@@ -121,6 +126,7 @@ void maxBinaryHeap::insert(std::string cntdis, int numofkrousmata){
           currnode->left = new heapnode();
           currnode->left->cat_name = cntdis;
           currnode->left->krousmata = numofkrousmata;
+          currnode->left->pososto = posost;
           currnode->left->parent = currnode;
           latest = currnode->left;
           number_of_nodes++;
@@ -219,6 +225,7 @@ heapnode::heapnode(){
   right = NULL;
   parent = NULL;
   krousmata = 0;
+  //pososto = 0.0;
 }
 
 //copy constructor gia klhsh isws mazi me thn extract
@@ -228,6 +235,7 @@ heapnode::heapnode(const heapnode &par){
   parent = NULL;
   cat_name = par.cat_name;
   krousmata = par.krousmata;
+  pososto = par.pososto;
 }
 
 //destructor. DOULEUEI ANADROMIKA LOGW DELETE POY STH C++ KALEI TOUS DESTRUCTORS
@@ -245,6 +253,7 @@ simple_cd_HT::simple_cd_HT(int sz){
   for(unsigned int i=0; i<size; i++){
     table[i] = NULL; //arxika adeio olo
   }
+  sunolika =0;
 }
 
 //destructor
@@ -264,6 +273,7 @@ int simple_cd_HT::insert_krousma(record * rec){
     if(table[hval] == NULL){ //ean den yparxei alusida ekei, th ftiaxnoyme
       table[hval] = new simple_cd_HT_node();
       table[hval]->krousmata += 1;
+      sunolika++;
       table[hval]->cd_name = std::to_string(get_age_category(rec->get_age())); //gia na mhn ginoun terasties allages sth domh ths 1hs askhshs, apla kanw ton arithmo-anagnwristiko ths kathgorias hlikias string
       return 0;
     }
@@ -272,16 +282,19 @@ int simple_cd_HT::insert_krousma(record * rec){
       while(currptr->next != NULL){ //paei sto teleutaio
         if(currptr->cd_name == std::to_string(get_age_category(rec->get_age())) ){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
           currptr->krousmata += 1;
+          sunolika++;
           return 0;
         }
         currptr = currptr->next ;
       }//telos while buckets
       if(currptr->cd_name == std::to_string(get_age_category(rec->get_age())) ){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
         currptr->krousmata += 1;
+        sunolika++;
         return 0;
       }
       currptr->next = new simple_cd_HT_node();
       currptr->krousmata += 1;
+      sunolika++;
       currptr->cd_name = std::to_string(get_age_category(rec->get_age())); //gia na mhn ginoun terasties allages sth domh ths 1hs askhshs, apla kanw ton arithmo-anagnwristiko ths kathgorias hlikias string;
       return 0; //ola ok
     }//telos else alusidas
@@ -297,7 +310,8 @@ void simple_cd_HT::populate_heap(maxBinaryHeap * heaptr){
     else{
       simple_cd_HT_node * currptr = table[i];
       while(currptr!= NULL){ //paei sto teleutaio. ENDEIKTIKH EKTYPWSH. MONO MERIKA PEDIA ALLA MPORW KAI OLA
-        heaptr->insert(currptr->cd_name, currptr->krousmata);
+        currptr->pososto = (float)currptr->krousmata / (float)sunolika; //ypologismos posostou apo teliko apotelesma
+        heaptr->insert(currptr->cd_name, currptr->krousmata, currptr->pososto);
         currptr = currptr->next ;
       }//telos while gia orizontia lista
     }//telos else
