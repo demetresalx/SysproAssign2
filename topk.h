@@ -39,7 +39,7 @@ public:
 class simple_cd_HT_node{
 public:
   simple_cd_HT_node * next; //deikths ston epomeno komvo
-  std::string cd_name; //onoma xwras h arrwstias
+  std::string cd_name; //kwdikos hlikiakhs kathgorias
   int krousmata; //arithmos krousmatwn
 
   simple_cd_HT_node(){ next = NULL; krousmata =0;}; //enas empty constructor
@@ -53,9 +53,9 @@ class simple_cd_HT{
 public:
   int size; //megethos pinaka. tha einai iso me h1+h2
   simple_cd_HT_node ** table; //ena array poy apoteleitai apo listes eggrafwn (buckets).
-  std::string categ_name; //an einai disease h country
+
   simple_cd_HT(){}; //enas empty contrusctor
-  simple_cd_HT(int , std::string ); //enas constructor me orisma size
+  simple_cd_HT(int); //enas constructor me orisma size
   ~simple_cd_HT();
 
   int insert_krousma(record * ); //vazei ena record mesa sto HT. HASHING BASEI ID

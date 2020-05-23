@@ -239,8 +239,7 @@ heapnode::~heapnode(){
 
 
 //SUNARTHSEIS SIMPLEHT
-simple_cd_HT::simple_cd_HT(int sz, std::string ctg){
-  categ_name = ctg;
+simple_cd_HT::simple_cd_HT(int sz){
   size = sz;
   table = new simple_cd_HT_node *[size]; //ena dunamiko array apo deiktes se ht_nodes (buckets)
   for(unsigned int i=0; i<size; i++){
@@ -258,64 +257,35 @@ simple_cd_HT::~simple_cd_HT(){
 
 //constructor simple node basei record
 int simple_cd_HT::insert_krousma(record * rec){
-  if(categ_name == "disease"){
-    unsigned hval = hash_str(rec->get_diseaseID()); //hasharei to disease
+
+    unsigned hval = get_age_category(rec->get_age()); //pame sth 8esh pinaka basei hlikiakhs kathgorias
     hval = hval % size; //gia na pame sth swsth thesh pinaka
 
     if(table[hval] == NULL){ //ean den yparxei alusida ekei, th ftiaxnoyme
       table[hval] = new simple_cd_HT_node();
       table[hval]->krousmata += 1;
-      table[hval]->cd_name = rec->get_diseaseID();
+      table[hval]->cd_name = std::to_string(get_age_category(rec->get_age())); //gia na mhn ginoun terasties allages sth domh ths 1hs askhshs, apla kanw ton arithmo-anagnwristiko ths kathgorias hlikias string
       return 0;
     }
     else{ //yparxei alusida, pame sto telos ENW KOITAZOUME OTI DEN YPARXEI IDIO ID
       simple_cd_HT_node * currptr = table[hval];
       while(currptr->next != NULL){ //paei sto teleutaio
-        if(currptr->cd_name == rec->get_diseaseID()){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
+        if(currptr->cd_name == std::to_string(get_age_category(rec->get_age())) ){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
           currptr->krousmata += 1;
           return 0;
         }
         currptr = currptr->next ;
       }//telos while buckets
-      if(currptr->cd_name == rec->get_diseaseID()){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
+      if(currptr->cd_name == std::to_string(get_age_category(rec->get_age())) ){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
         currptr->krousmata += 1;
         return 0;
       }
       currptr->next = new simple_cd_HT_node();
       currptr->krousmata += 1;
-      currptr->cd_name = rec->get_diseaseID();
+      currptr->cd_name = std::to_string(get_age_category(rec->get_age())); //gia na mhn ginoun terasties allages sth domh ths 1hs askhshs, apla kanw ton arithmo-anagnwristiko ths kathgorias hlikias string;
       return 0; //ola ok
     }//telos else alusidas
-  }//telos if disease
-  else if(categ_name == "country"){
-    unsigned hval = hash_str(rec->get_country()); //hasharei to disease
-    hval = hval % size; //gia na pame sth swsth thesh pinaka
 
-    if(table[hval] == NULL){ //ean den yparxei alusida ekei, th ftiaxnoyme
-      table[hval] = new simple_cd_HT_node();
-      table[hval]->krousmata += 1;
-      table[hval]->cd_name = rec->get_country();
-      return 0;
-    }
-    else{ //yparxei alusida, pame sto telos ENW KOITAZOUME OTI DEN YPARXEI IDIO ID
-      simple_cd_HT_node * currptr = table[hval];
-      while(currptr->next != NULL){ //paei sto teleutaio
-        if(currptr->cd_name == rec->get_country()){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
-          currptr->krousmata += 1;
-          return 0;
-        }
-        currptr = currptr->next ;
-      }//telos while buckets
-      if(currptr->cd_name == rec->get_country()){ //brethhke h idia astheneia. aplws aukshsh krousmatwn k telos
-        currptr->krousmata += 1;
-        return 0;
-      }
-      currptr->next = new simple_cd_HT_node();
-      currptr->krousmata += 1;
-      currptr->cd_name = rec->get_country();
-      return 0; //ola ok
-    }//telos else alusidas
-  }//telos else if country
   return 0;
 }
 

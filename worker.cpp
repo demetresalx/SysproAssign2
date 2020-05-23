@@ -221,6 +221,19 @@ int work(char * read_pipe, char * write_pipe, int bsize){
             send_string(write_fd, "nope", bsize); //grapse oti de brhkes tpt
           successful++;//epituxia
         }//telos if searchPatientRecord
+        else if(tool == "/topk-AgeRanges"){
+          int kapa = 0;
+          read(read_fd, &kapa, sizeof(int)); //pare timh k
+          std::string country;
+          rdb = receive_string(read_fd, &country, bsize); //pare country
+          std::string disease;
+          rdb = receive_string(read_fd, &disease, bsize); //pare disease
+          std::string date1;
+          rdb = receive_string(read_fd, &date1, bsize); //diabase date1
+          std::string date2;
+          rdb = receive_string(read_fd, &date2, bsize); //diabase date2
+          countries_htable.topk_age_ranges(kapa, country, disease, date1, date2);
+        }//telos topk
         else{
           std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
         }

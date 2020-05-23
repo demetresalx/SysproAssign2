@@ -327,3 +327,20 @@ int file_summary::insert_data(std::string * record_parts){
   }//telos if einai entry eggrafh
   return -1;
 }
+
+//moy leei an einai sthn 1h, 2h, 3h h 4h orismenh kathgoria hlikias
+int get_age_category(int age){
+  //error, should never happen
+  if(age <0)
+    return -1;
+
+  if((age >= 0)&&(age <= 20))
+    {return 0;} //ekei anhkei
+  else if((age >= 21)&&(age <= 40))
+    {return 1;} //ekei anhkei
+  else if((age >= 41)&&(age <= 60))
+    {return 2;} //ekei anhkei
+  else //61+
+    {return 3;} //ekei anhkei
+
+}

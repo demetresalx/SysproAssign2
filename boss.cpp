@@ -117,10 +117,16 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           if(ind == 4){ //xwris to proairetiko country
             if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
               std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+              for(int i=0; i<wnum; i++)
+                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              failed++;//apotuxia
               continue;
             }
             if((requ[2] == "-") || requ[3]== "-"){
               std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+              for(int i=0; i<wnum; i++)
+                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              failed++;//apotuxia
               continue;
             }
             //prow9hse to aithma sta children mesw pipe
@@ -143,10 +149,16 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           else if(ind ==5){ //me proairetiko orisma country
             if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
               std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+              for(int i=0; i<wnum; i++)
+                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              failed++;//apotuxia
               continue;
             }
             if((requ[2] == "-") || requ[3]== "-"){
               std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+              for(int i=0; i<wnum; i++)
+                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              failed++;//apotuxia
               continue;
             }
             //prow9hse to aithma sta children mesw pipe
@@ -226,6 +238,49 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         }
 
       }//telos searchPatientRecord
+      else if(requ[0] == "/topk-AgeRanges"){
+        if(ind == 6){ //apodektos arithmos orismatwn
+          if((dates_compare(requ[4], requ[5]) != "smaller") && (dates_compare(requ[4], requ[5]) != "equal") ){ //kakws orismeno date
+            std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          if((requ[4] == "-") || requ[5]== "-"){
+            std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          int kapa = stoi(requ[1]); // h timh tou k
+          if((kapa < 1)||(kapa > 4)){ //lathos timh k
+            std::cout << "k must be integer in range [1, 4]\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          //steile to aithma stous workers
+          for(int i=0; i<wnum; i++){
+            send_string(pipe_fds[2*i +1].fd, "/topk-AgeRanges", bsize);//steile thn entolh
+            write(pipe_fds[2*i +1].fd, &kapa, sizeof(int));//steile k
+            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile country
+            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile disease
+            send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile date1
+            send_string(pipe_fds[2*i +1].fd, &requ[5], bsize);//steile date2
+          }
+          successful++;//epituxia
+        }
+        else{//ekana lathos sthn entolh
+          std::cout << "Lathos sta orismata. try again...\n";
+          for(int i=0; i<wnum; i++)
+            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+          failed++;//apotuxia
+        }
+
+      }//telos topk
       else{
         std::cout << "kakws orismenh entolh\n";
         for(int i=0; i<wnum; i++)

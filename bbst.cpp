@@ -75,6 +75,8 @@ void BBST::collect_dated_reclists(BBST* root,std::string date2, search_containte
   return;
 }
 
+
+
 //gemizei ton simple epikouriko ht gia to topk
 void BBST::populate_simpleht(simple_cd_HT * htptr){
   if(list_of_records == NULL)
@@ -234,6 +236,35 @@ void search_containter::populate_simpleht(simple_cd_HT *htptr, std::string date1
       else if(dates_compare(currptr->recptr->get_exitDate(), date1) == "equal" ){
         if(dates_compare(currptr->recptr->get_entryDate(), date1) == "equal" )
           htptr->insert_krousma(currptr->recptr); //vazei kai autous poy mphkan kai bghkan thn idia mera an to exitdate einai iso me date1
+      }
+      else
+        num_approved += 0;
+      currptr = currptr->next;
+    }//telos while gia lista eggrafwn
+  }//telos for gia thn i lista
+  return;
+}
+
+//disqualify tis exitdate <= date1 kai eisodos se simpleht gia topk MAZI ME ELEGXO DISEASE
+void search_containter::populate_simpleht(simple_cd_HT *htptr, std::string date1, std::string disease_name){
+  int num_approved =0;
+  for(unsigned int i=0; i<index; i++){
+    if(arr[i] == NULL) //oi eisagwges ginontai h mia meta thn allh ksekinwntas apo to 0. to prwto null shmainei den exei alles
+      return;
+    reclist * currptr = arr[i];
+    while(currptr != NULL){
+      if(currptr->recptr->get_exitDate() == "-"){ //einai akoma mesa. ton theloyme
+        if(currptr->recptr->get_diseaseID() == disease_name) //MONO EAN EXEI TO DISEASE POY THELW THA ASXOLH8W
+          htptr->insert_krousma(currptr->recptr);
+      }
+      else if(dates_compare(currptr->recptr->get_exitDate(), date1) == "bigger" ){
+        if(currptr->recptr->get_diseaseID() == disease_name) //MONO EAN EXEI TO DISEASE POY THELW THA ASXOLH8W
+          htptr->insert_krousma(currptr->recptr); //exei exitdate megalutero tou date1, to theloyme
+      }
+      else if(dates_compare(currptr->recptr->get_exitDate(), date1) == "equal" ){
+        if(dates_compare(currptr->recptr->get_entryDate(), date1) == "equal" )
+          if(currptr->recptr->get_diseaseID() == disease_name) //MONO EAN EXEI TO DISEASE POY THELW THA ASXOLH8W
+            htptr->insert_krousma(currptr->recptr); //vazei kai autous poy mphkan kai bghkan thn idia mera an to exitdate einai iso me date1
       }
       else
         num_approved += 0;

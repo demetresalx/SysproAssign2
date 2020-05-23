@@ -31,6 +31,8 @@ std::string dates_compare(std::string , std::string );
 //elegxei an ena date einai ok
 bool is_date_ok(std::string );
 
+int get_age_category(int );
+
 //boh8htikh domh gia to summary. anaferetai se dedomena enos arxeiou ana io
 //sthn epanalhpsh sthn opoia xrhsimopoeitai einai gnwsth h xwra kai h hmeromhnia opote de thn krataw kai edw
 class file_summary{
