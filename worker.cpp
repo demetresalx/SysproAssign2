@@ -239,6 +239,32 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           deliver_topk(write_fd, fetched, resul_arr, fresul_arr); //steile apotelesmata ston patera
           delete[] resul_arr;
         }//telos topk
+        else if(tool == "/numPatientAdmissions1"){
+          std::string dis_name;
+          rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
+          std::string date1;
+          rdb = receive_string(read_fd, &date1, bsize); //diabase date1
+          std::string date2;
+          rdb = receive_string(read_fd, &date2, bsize); //diabase date2
+          int number_to_present = diseases_htable.total_recs_for_cat(dis_name, date1, date2);
+          //std::cout << dis_name << " ^ " << number_to_present << "\n";
+          write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
+          successful++;//epituxia
+        }//telos numPatientAdmissions1
+        else if(tool == "/numPatientAdmissions2"){
+          std::string dis_name;
+          rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
+          std::string date1;
+          rdb = receive_string(read_fd, &date1, bsize); //diabase date1
+          std::string date2;
+          rdb = receive_string(read_fd, &date2, bsize); //diabase date2
+          std::string country;
+          rdb = receive_string(read_fd, &country, bsize); //diabase date2
+          int number_to_present = diseases_htable.admissions(dis_name, date1, date2, country);
+          //std::cout << dis_name << " ^ " << number_to_present << "\n";
+          write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
+          successful++; //epituxia
+        }//telos numPatientAdmissions2
         else{
           std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
         }

@@ -31,6 +31,8 @@ public:
   void insert_reclist(reclist* );
   int count_exit_limit(std::string ); //kanei disqualify oses den exoun exitdate > date1
   int count_exit_limit(std::string , std::string ); //gia diseaseFrequency me orisma country
+  int count_entry_limit(std::string ); //kanei disqualify oses den exoune entrydate >= date1
+  int count_entry_limit(std::string , std::string ); //to apo panw me orisma country
   void populate_simpleht(simple_cd_HT *, std::string ); //gia topk otan exoume date1 date2
   void populate_simpleht(simple_cd_HT *, std::string , std::string ); //gia topk age ranges
 };

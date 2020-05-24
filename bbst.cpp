@@ -195,6 +195,54 @@ int search_containter::count_exit_limit(std::string date1){
   return num_approved;
 }//telos sunarthshs
 
+//O,TI EINAI MESA STON CONTAINER EXEI ENTRYDATE <= DATE2. KOITAZEI GIA ENTRYDATE >= DATE1 TWRA
+int search_containter::count_entry_limit(std::string date1){
+  int num_approved =0;
+  for(unsigned int i=0; i<index; i++){
+    if(arr[i] == NULL) //oi eisagwges ginontai h mia meta thn allh ksekinwntas apo to 0. to prwto null shmainei den exei alles
+      return num_approved;
+    reclist * currptr = arr[i];
+    while(currptr != NULL){
+
+      if(dates_compare(currptr->recptr->get_entryDate(), date1) == "bigger" ){
+        num_approved++; //exei entry megalutero tou date1, to theloyme
+      }
+      else if(dates_compare(currptr->recptr->get_entryDate(), date1) == "equal" ){
+        num_approved++; //vazei kai autous an to entrydate einai iso me date1
+      }
+      else
+        num_approved += 0;
+      currptr = currptr->next;
+    }//telos while gia lista eggrafwn
+  }//telos for gia thn i lista
+  return num_approved;
+}//telos sunarthshs
+
+//idia me apo panw aplws elegxei k country
+int search_containter::count_entry_limit(std::string date1, std::string country){
+  int num_approved =0;
+  for(unsigned int i=0; i<index; i++){
+    if(arr[i] == NULL) //oi eisagwges ginontai h mia meta thn allh ksekinwntas apo to 0. to prwto null shmainei den exei alles
+      return num_approved;
+    reclist * currptr = arr[i];
+    while(currptr != NULL){
+
+      if(dates_compare(currptr->recptr->get_entryDate(), date1) == "bigger" ){
+        if(currptr->recptr->get_country() == country) //tsekarw k country
+          num_approved++; //exei entry megalutero tou date1, to theloyme
+      }
+      else if(dates_compare(currptr->recptr->get_entryDate(), date1) == "equal" ){
+        if(currptr->recptr->get_country() == country) //tsekarw k country
+          num_approved++; //vazei kai autous an to entrydate einai iso me date1
+      }
+      else
+        num_approved += 0;
+      currptr = currptr->next;
+    }//telos while gia lista eggrafwn
+  }//telos for gia thn i lista
+  return num_approved;
+}//telos sunarthshs
+
 //O,TI EINAI MESA STON CONTAINER EINAI ENTRYDATE <= DATE2. KOITAZEI GIA EXITDATE > DATE1 KAI EPIPLEON COUNTRY GIA THN DISEASEFREQUENCY
 int search_containter::count_exit_limit(std::string date1, std::string country){
   int num_approved =0;

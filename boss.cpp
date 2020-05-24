@@ -284,6 +284,79 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         }
 
       }//telos topk
+      else if(requ[0] == "/numPatientAdmissions"){
+        if(ind == 4){ //xwris to proairetiko country
+          if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
+            std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          if((requ[2] == "-") || requ[3]== "-"){
+            std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          //prow9hse to aithma sta children mesw pipe
+          for(int i=0; i<wnum; i++){
+            send_string(pipe_fds[2*i +1].fd, "/numPatientAdmissions1", bsize);//steile thn entolh
+            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+          }
+          //pare apanthsh
+          int intreader=0;
+          int intreader2=0;
+          for(int i=0; i<wnum; i++){ //pare ton arithmo
+              read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+              intreader2 += intreader;
+          }
+          std::cout << intreader2 << "\n";
+          successful++;//epituxia
+        }
+        else if(ind ==5){ //me proairetiko orisma country
+          if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
+            std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          if((requ[2] == "-") || requ[3]== "-"){
+            std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          //prow9hse to aithma sta children mesw pipe
+          for(int i=0; i<wnum; i++){
+            send_string(pipe_fds[2*i +1].fd, "/numPatientAdmissions2", bsize);//steile thn entolh
+            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+            send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile country
+          }
+          //pare apanthsh
+          int intreader=0;
+          int intreader2=0;
+          for(int i=0; i<wnum; i++){ //pare ton arithmo
+              read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+              intreader2 += intreader;
+          }
+          std::cout << intreader2 << "\n";
+          successful++;//epituxia
+        }
+        else{//ekana lathos sthn entolh
+          std::cout << "Lathos sta orismata. try again...\n";
+          for(int i=0; i<wnum; i++)
+            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+          failed++;//apotuxia
+        }
+      } //telos numPatientAdmissions
       else{
         std::cout << "kakws orismenh entolh\n";
         for(int i=0; i<wnum; i++)

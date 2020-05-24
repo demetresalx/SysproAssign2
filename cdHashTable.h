@@ -58,6 +58,8 @@ public:
   void numCurrentPatients(std::string );
   int total_recs_for_cat(std::string, std::string , std::string ); //gia to diseaseFrequency xwris orisma country
   int total_recs_for_cat(std::string, std::string , std::string , std::string ); //gia to diseaseFrequency ME orisma country
+  int admissions(std::string, std::string , std::string ); //gia admissions xwris orisma country
+  int admissions(std::string, std::string , std::string , std::string ); //gia admissions ME country
   void topk_countries(int , std::string ); //antistoixo erwthma
   void topk_countries(int , std::string , std::string, std::string ); //antistoixo erwthma me date1 k date2
 };
