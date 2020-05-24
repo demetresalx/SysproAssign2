@@ -37,6 +37,8 @@ class record{
     std::string get_entryDate();
     std::string get_exitDate();
     int get_age();
+
+    void print(){std::cout << recordID << " " << patientFirstName << " " << patientLastName << " " << diseaseID << " " << country << " " << entryDate << " " << exitDate <<"\n";};
     ~record(); //destructor
 
 };

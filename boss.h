@@ -9,6 +9,6 @@ int administrate(char *, int , int , std::string *, int *);
 void read_and_present_topk(int );
 
 //diabase kai ektypwse apotelesmata numadmissions se periptwsh xwris country
-void read_and_present_numadmissions1(int , int );
+void read_and_present_num_adms_disch(int , int );
 
 #endif

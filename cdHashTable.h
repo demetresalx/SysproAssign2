@@ -61,6 +61,7 @@ public:
   int admissions(std::string, std::string , std::string , std::string ); //gia admissions ME country
   void topk_countries(int , std::string ); //antistoixo erwthma
   void topk_countries(int , std::string , std::string, std::string ); //antistoixo erwthma me date1 k date2
+  int discharges(std::string, std::string , std::string , std::string ); //gia discharges ME country
 };
 
 class countryHashTable : public cdHashTable { //o hash table gia disease

@@ -55,7 +55,7 @@ int BBST::insert_record(record* rec){
 
 }//telos sunarthshs
 
-//arwgos sunarthsh sta erwthmata 1 kai 2
+//arwgos sunarthsh
 void BBST::collect_dated_reclists(BBST* root,std::string date2, search_containter * sc ){
   if(root == NULL)
     return; //xtyphsame akrh
@@ -72,6 +72,16 @@ void BBST::collect_dated_reclists(BBST* root,std::string date2, search_containte
   else if(resu == "bigger"){
     collect_dated_reclists(root->left_child, date2, sc);
   }
+  return;
+}
+
+//arwgos sunarthsh gia discharge
+void BBST::collect_all_reclists(BBST* root, search_containter * sc ){
+  if(root == NULL)
+    return; //xtyphsame akrh
+  sc->insert_reclist(root->list_of_records);
+  collect_all_reclists(root->left_child, sc);
+  collect_all_reclists(root->right_child, sc);
   return;
 }
 
@@ -258,6 +268,30 @@ int search_containter::count_exit_limit(std::string date1, std::string country){
       }
       else if((dates_compare(currptr->recptr->get_exitDate(), date1) == "equal" ) && (currptr->recptr->get_country() == country)){
         if(dates_compare(currptr->recptr->get_entryDate(), date1) == "equal" )
+          num_approved++; //vazei kai autous poy mphkan kai bghkan thn idia mera an to exitdate einai iso me date1
+      }
+      else
+        num_approved += 0;
+      currptr = currptr->next;
+    }//telos while gia lista eggrafwn
+  }//telos for gia thn i lista
+  return num_approved;
+}//telos sunarthshs
+
+int search_containter::count_exit_limit2(std::string date1, std::string date2, std::string country){
+  int num_approved =0;
+  for(unsigned int i=0; i<index; i++){
+    if(arr[i] == NULL) //oi eisagwges ginontai h mia meta thn allh ksekinwntas apo to 0. to prwto null shmainei den exei alles
+      return num_approved;
+    reclist * currptr = arr[i];
+    while(currptr != NULL){
+
+      if((dates_compare(currptr->recptr->get_exitDate(), date1) == "bigger" )&& (currptr->recptr->get_country() == country)){ //koitame kai xwra pleon
+        if((dates_compare(currptr->recptr->get_exitDate(), date2) == "smaller" )||(dates_compare(currptr->recptr->get_exitDate(), date2) == "equal" ))
+          num_approved++; //exei exitdate megalutero tou date1, to theloyme
+      }
+      else if((dates_compare(currptr->recptr->get_exitDate(), date1) == "equal" ) && (currptr->recptr->get_country() == country)){
+        if((dates_compare(currptr->recptr->get_exitDate(), date2) == "smaller" )||(dates_compare(currptr->recptr->get_exitDate(), date2) == "equal" ))
           num_approved++; //vazei kai autous poy mphkan kai bghkan thn idia mera an to exitdate einai iso me date1
       }
       else

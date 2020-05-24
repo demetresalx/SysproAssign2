@@ -55,6 +55,7 @@ int record_HT::insert_record(record * rec){
             if((dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "smaller") && (dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "equal"))
             {/*std::cout << "ERROR do8en exit pro= yparxontos entry " << rec->get_recordID() << "\n";*/delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
             currptr->rec_ptr->set_exitDate(rec->get_exitDate()); //enhmerwse exit date
+            //currptr->rec_ptr->print();
             delete rec;
             return 3; //ola ok
           }
@@ -79,6 +80,7 @@ int record_HT::insert_record(record * rec){
           if((dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "smaller") && (dates_compare(currptr->rec_ptr->get_entryDate(), rec->get_exitDate()) != "equal"))
           {/*std::cout << "ERROR do8en exit pro= yparxontos entry " << rec->get_recordID() << "\n";*/delete rec; return -1;} //to do8en exit date einai mikrotero tou yparxontos entry date
           currptr->rec_ptr->set_exitDate(rec->get_exitDate()); //enhmerwse exit date
+          //currptr->rec_ptr->print();
           delete rec;
           return 3; //ola ok
         }

@@ -309,7 +309,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           }
           //pare apanthsh
           for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read_and_present_numadmissions1(pipe_fds[2*i].fd, bsize);
+              read_and_present_num_adms_disch(pipe_fds[2*i].fd, bsize);
           }
           successful++;//epituxia
         }
@@ -353,6 +353,75 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           failed++;//apotuxia
         }
       } //telos numPatientAdmissions
+      else if(requ[0] == "/numPatientDischarges"){
+        if(ind == 4){ //xwris to proairetiko country
+          if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
+            std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          if((requ[2] == "-") || requ[3]== "-"){
+            std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          //prow9hse to aithma sta children mesw pipe
+          for(int i=0; i<wnum; i++){
+            send_string(pipe_fds[2*i +1].fd, "/numPatientDischarges1", bsize);//steile thn entolh
+            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+          }
+          //pare apanthsh
+          for(int i=0; i<wnum; i++){ //pare ton arithmo
+              read_and_present_num_adms_disch(pipe_fds[2*i].fd, bsize);
+          }
+          successful++;//epituxia
+        }
+        else if(ind ==5){ //me proairetiko orisma country
+          if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
+            std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          if((requ[2] == "-") || requ[3]== "-"){
+            std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
+            for(int i=0; i<wnum; i++)
+              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            failed++;//apotuxia
+            continue;
+          }
+          //prow9hse to aithma sta children mesw pipe
+          for(int i=0; i<wnum; i++){
+            send_string(pipe_fds[2*i +1].fd, "/numPatientDischarges2", bsize);//steile thn entolh
+            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+            send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile country
+          }
+          //pare apanthsh
+          int intreader=0;
+          int intreader2=0;
+          for(int i=0; i<wnum; i++){ //pare ton arithmo
+              read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+              intreader2 += intreader;
+          }
+          std::cout << intreader2 << "\n";
+          successful++;//epituxia
+        }
+        else{//ekana lathos sthn entolh
+          std::cout << "Lathos sta orismata. try again...\n";
+          for(int i=0; i<wnum; i++)
+            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+          failed++;//apotuxia
+        }
+      }//telos numPatientDischarges
       else{
         std::cout << "kakws orismenh entolh\n";
         for(int i=0; i<wnum; i++)
@@ -407,7 +476,7 @@ void read_and_present_topk(int rfd){
 }
 
 //pare kai parousiase ta apotelesmata topk apo ena pipe paidiou
-void read_and_present_numadmissions1(int rfd, int bsize){
+void read_and_present_num_adms_disch(int rfd, int bsize){
   int nc =0;
   int adms=0;
   read(rfd, &nc, sizeof(int));

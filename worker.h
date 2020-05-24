@@ -8,7 +8,7 @@ int work(char *, char *, int );
 void deliver_topk(int , int, int * , float *);
 
 //stelnei ston patera to apotelesma tus numPatientAdmissions xwris orisma country
-void deliver_numadmissions1(int, int ,void *, int * , int );
+void deliver_num_adms_disch1(int, int ,void *, int * , int );
 
 
 #endif
