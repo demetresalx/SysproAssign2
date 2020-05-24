@@ -308,13 +308,9 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
           }
           //pare apanthsh
-          int intreader=0;
-          int intreader2=0;
           for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read(pipe_fds[2*i].fd, &intreader, sizeof(int));
-              intreader2 += intreader;
+              read_and_present_numadmissions1(pipe_fds[2*i].fd, bsize);
           }
-          std::cout << intreader2 << "\n";
           successful++;//epituxia
         }
         else if(ind ==5){ //me proairetiko orisma country
@@ -408,4 +404,20 @@ void read_and_present_topk(int rfd){
     else
       printf("60+: %.0f%\n",pososto*100);
   }
+}
+
+//pare kai parousiase ta apotelesmata topk apo ena pipe paidiou
+void read_and_present_numadmissions1(int rfd, int bsize){
+  int nc =0;
+  int adms=0;
+  read(rfd, &nc, sizeof(int));
+  std::string cname;
+  for(int i=0; i< nc; i++){
+    //pare onoma xwras
+    receive_string(rfd, &cname, bsize);
+    //pare timh
+    read(rfd, &adms, sizeof(int));
+    std::cout << cname << " " << adms << "\n";
+  }
+
 }

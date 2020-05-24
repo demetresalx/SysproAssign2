@@ -239,16 +239,19 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           deliver_topk(write_fd, fetched, resul_arr, fresul_arr); //steile apotelesmata ston patera
           delete[] resul_arr;
         }//telos topk
-        else if(tool == "/numPatientAdmissions1"){
+        else if(tool == "/numPatientAdmissions1"){ //xwris country
           std::string dis_name;
           rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
           std::string date1;
           rdb = receive_string(read_fd, &date1, bsize); //diabase date1
           std::string date2;
           rdb = receive_string(read_fd, &date2, bsize); //diabase date2
-          int number_to_present = diseases_htable.total_recs_for_cat(dis_name, date1, date2);
-          //std::cout << dis_name << " ^ " << number_to_present << "\n";
-          write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
+          int * country_admissions = new int[n_dirs];
+          for(int i=0; i<n_dirs; i++)//bres gia auth th xwra
+            country_admissions[i] = diseases_htable.admissions(dis_name, date1, date2, countries[i]);
+          //ta stelnw ektos loop gia na mhn ka8usteroun oi workers kai na douleuoun aneksarthta
+          deliver_numadmissions1(write_fd, n_dirs, countries, country_admissions , bsize);
+          delete[] country_admissions;
           successful++;//epituxia
         }//telos numPatientAdmissions1
         else if(tool == "/numPatientAdmissions2"){
@@ -294,6 +297,15 @@ void deliver_topk(int wfd, int fetchd, int * res_arr, float * fres_arr){
     write(wfd, &fres_arr[i], sizeof(float)); //pososto krousmatwn ths
 
   }
+}
 
-
+//stelnw apotelesmata sthn 1h periptwsh ths numadmissions
+void deliver_numadmissions1(int wfd, int ncountries ,void * stptr, int * admis , int bsize){
+  write(wfd, &ncountries, sizeof(int));
+  for(int i=0; i<ncountries; i++){
+    //stelnw xwra
+    send_string(wfd, &(((std::string *)stptr)[i]), bsize );
+    //stelnw timh
+    write(wfd, &admis[i], sizeof(int));
+  }
 }

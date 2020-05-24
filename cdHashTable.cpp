@@ -289,39 +289,6 @@ int diseaseHashTable::total_recs_for_cat(std::string diseasename, std::string da
   return 0;
 }
 
-//gia admissions xwris country
-int diseaseHashTable::admissions(std::string diseasename, std::string date1, std::string date2){
-  unsigned hval = hash_str(diseasename); //hasharei to diseaseID
-  hval = hval % size; //gia na pame sth swsth thesh pinaka
-
-  if(table[hval] == NULL){ //Auth h periptwsh de tha ginei pote sthn askhsh
-    //std::cout <<  diseasename << " " << 0 << "\n";
-    return 0;
-  }
-  else{
-    chain_node * currptr = table[hval];
-    while(currptr!= NULL){ //to psaxnei dieksodika wste na brethei h astheneia
-      block_entry * buroku = currptr->block;
-      for(unsigned int i=0; i< currptr->block_size; i++){
-        if(buroku[i].dis_name_ptr == NULL)
-          continue;
-        if(*(buroku[i].dis_name_ptr) == diseasename){
-          //EDW GINETAI H DOULITSA ME TO DENDRO
-          search_containter querycontainer(buroku[i].totalval); //to megisto plhthos eggrafwn einai o sunolikos arithmos eggrafwn auths ths atheneias/xwras
-          //twra o container exei oles tis eggrafes ths astheneias/xwras me entrydate <= date2. H parakatw entolh ftiaxnei kai thn allh proypothesh
-          buroku[i].tree_ptr->collect_dated_reclists(buroku[i].tree_ptr, date2, &querycontainer); //o container exei tis eggrafes gia authn thn astheneia/xwra me entrydate <= Date2. Ekmetalleuetai th dendrikh domh gia kalyterh polyplokothta
-          int number_to_present = querycontainer.count_exit_limit(date1);
-          //std::cout << *(buroku[i].dis_name_ptr) << " " << number_to_present << "\n";
-          return number_to_present;
-        }
-      }//telos for gia block
-      currptr = currptr->next ;
-    }//telos while gia orizontia lista
-
-  }//telos else
-  //std::cout << diseasename << " " << 0 << "\n";
-  return 0;
-}
 
 //gia to admissions ME country
 int diseaseHashTable::admissions(std::string diseasename, std::string date1, std::string date2, std::string country){
@@ -477,6 +444,8 @@ int countryHashTable::insert_record(record* rec){
 
   return 0;
 }
+
+
 
 //gia to antistoixo erwthma XWRIS date1 date2
 void countryHashTable::topk_diseases(int k, std::string country){
