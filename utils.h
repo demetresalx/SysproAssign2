@@ -47,7 +47,22 @@ public:
   int insert_data(std::string * ); //enhmerwnei tis metavlhtes poy prepei apo ta merh enos record
   void print_contents();
 };
+//edw tha krataw antikeimena apo panw class. telika tha ta stelnw gonio
+class directory_summary{
+public:
+  std::string countryname; //h xwra poy antistoixei sto directory
+  int nfiles; //posa arxeia exei to directory
+  std::string * filenames; //pinakas me ta onomata twn arxeiwn - hmeromhnies
+  int * nodes_per_file; //gia na kserw gia tis loupes
+  file_summary ** tfile_sums; //enas pinakas apo deiktes se file sums. sthn i thesh einai to summary poy tha estelne to i arxeio
 
-
+  directory_summary(){};
+  directory_summary(int , std::string ); //me plh8os arxeiwn k xwra
+  ~directory_summary();
+};
+//gia na stelnw ta summaries enos arxeiou sto gonio
+void send_file_summary(int , int ,std::string , std::string, file_summary *, int );
+//gia na ta diabazw k na ta parousiazw apo gonio
+void receive_and_print_file_summary(int , int );
 
 #endif

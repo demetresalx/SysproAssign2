@@ -282,6 +282,83 @@ void sort_files(std::string * filesn , int low, int high){
     }
 }
 
+
+//moy leei an einai sthn 1h, 2h, 3h h 4h orismenh kathgoria hlikias
+int get_age_category(int age){
+  //error, should never happen
+  if(age <0)
+    return -1;
+
+  if((age >= 0)&&(age <= 20))
+    {return 0;} //ekei anhkei
+  else if((age >= 21)&&(age <= 40))
+    {return 1;} //ekei anhkei
+  else if((age >= 41)&&(age <= 60))
+    {return 2;} //ekei anhkei
+  else //61+
+    {return 3;} //ekei anhkei
+
+}
+
+//steile se kapoion (gonio) ta periexomena tou file summary
+void send_file_summary(int wfd, int summ_entries, std::string filename, std::string country, file_summary * fsm, int bsize){
+  write(wfd, &summ_entries, sizeof(int));
+  if(summ_entries == 0)
+    return; //mh grapseis tipota allo
+
+  //paw na grapsw
+  send_string(wfd, &filename, bsize);
+  send_string(wfd, &country, bsize);
+  file_summary * currptr = fsm;
+  for(int i=0; i<summ_entries; i++){
+    //steile onoma iou
+    send_string(wfd, &(currptr->diseasename), bsize);
+    //grapse arithmo krousmatwn kathe kathgorias hlikiakhs
+    for(int j=0; j<4; j++)
+      write(wfd, &(currptr->age_cats[j]), sizeof(int));
+
+    currptr = currptr->next; //h parametros summ entries einai tetoia poy de tha prokalesei problhma
+  }//telos for periexomena tou summary
+}//telos sunarthshs
+
+//diabase apo kapoion (paidi) ta periexomena tou summary
+void receive_and_print_file_summary(int rfd, int bsize){
+  int summ_entries =0;
+  read(rfd, &summ_entries, sizeof(int));
+  if(summ_entries == 0)
+    return; //mhn kaneis tpt allo
+
+  //paw na diabasw
+  std::string filename;
+  std::string country;
+  std::string dis_name;
+  receive_string(rfd, &filename, bsize);
+  receive_string(rfd, &country, bsize);
+  //AKOLOYTHW FORMAT EKTYPWSHS EKFWNHSHS
+  std::cout << filename << "\n";
+  std::cout << country << "\n";
+
+  for(int i=0; i<summ_entries; i++){
+    //diabase k printare onoma iou
+    receive_string(rfd, &dis_name, bsize);
+    std::cout << dis_name << "\n";
+    //diabase k deikse arithmo krousmatwn kathe kathgorias hlikiakhs
+    int krousm=0;
+    read(rfd, &krousm, sizeof(int));
+    std::cout << "Age range 0-20 years: " << krousm << " cases\n";
+    read(rfd, &krousm, sizeof(int));
+    std::cout << "Age range 21-40 years: " << krousm << " cases\n";
+    read(rfd, &krousm, sizeof(int));
+    std::cout << "Age range 41-60 years: " << krousm << " cases\n";
+    read(rfd, &krousm, sizeof(int));
+    std::cout << "Age range 60+ years: " << krousm << " cases\n";
+
+    //afhne kenh seira metaksu iwn opws fainetai na kanei h ekfwnhsh
+    std::cout << "\n";
+  }//telos for entries enos summary
+}//telos sunarthshs
+
+
 //gia th boh8htikh klash gia ta summaries ana io arxeiou
 file_summary::file_summary(){
   diseasename = "";
@@ -328,19 +405,19 @@ int file_summary::insert_data(std::string * record_parts){
   return -1;
 }
 
-//moy leei an einai sthn 1h, 2h, 3h h 4h orismenh kathgoria hlikias
-int get_age_category(int age){
-  //error, should never happen
-  if(age <0)
-    return -1;
+//h 2h boh8htikh klash gia summaries
+directory_summary::directory_summary(int filesn, std::string cnt){
+  nfiles = filesn;
+  countryname = cnt;
+  filenames = new std::string[nfiles];
+  nodes_per_file = new int[nfiles];
+  tfile_sums = new file_summary*[nfiles];
+}
 
-  if((age >= 0)&&(age <= 20))
-    {return 0;} //ekei anhkei
-  else if((age >= 21)&&(age <= 40))
-    {return 1;} //ekei anhkei
-  else if((age >= 41)&&(age <= 60))
-    {return 2;} //ekei anhkei
-  else //61+
-    {return 3;} //ekei anhkei
-
+directory_summary::~directory_summary(){
+  for(int i=0; i<nfiles; i++)
+    delete tfile_sums[i];
+  delete[] tfile_sums;
+  delete[] nodes_per_file;
+  delete[] filenames;
 }

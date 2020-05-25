@@ -98,20 +98,19 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   char jbuf[500];
   int n_dirs=0;
   int n_files=0;
+  int tot_files=0; //gia to summary
   //oi domes moy. Enas aplos HT gia eggrafes kai oi HTs apo thn ergasia 1
   record_HT records_htable(50); //o DIKOS MOU HT gia tis eggrafes basei recordID megethous h1+h2. KALUTEROS APO APLH LISTA
   diseaseHashTable diseases_htable(25, 64); //O erg1 HT GIA DISEASE
   countryHashTable countries_htable(25, 64); //O erg1 HT GIA COUNTRY
-  //anoigw tous descriptors gia na tous exw
-    //diabzw k stelnw pisw kati gia na dw oti ta pipes einai ok kai krataw tis times twn fds tous
-    read_fd = open(read_pipe, O_RDONLY );
-    std::string maxtool;
-    receive_string(read_fd, &maxtool, bsize);
-    write_fd = open(write_pipe, O_WRONLY);
-    send_string(write_fd, &maxtool, bsize);
+  //anoigw ta pipes kai krataw fds
+  read_fd = open(read_pipe, O_RDONLY );
+  write_fd = open(write_pipe, O_WRONLY);
+
 
     //DIABAZW DIRECTORIES POY MOY EDWSE O GONIOS
     read(read_fd, &n_dirs, sizeof(int));
+    directory_summary * dsums[n_dirs]; //gia ta summaries
     std::string * countries = new std::string[n_dirs]; //onomata xwrwn poy exw
     std::string * date_files = NULL; //tha mpoun ta filesnames-hmeromhnies
     for(int i=0; i<n_dirs; i++){
@@ -120,25 +119,50 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       receive_string(read_fd, sbuf, bsize ); //pairnw olo to path
       extract_files(sbuf, &n_files, &date_files); //pairnw plhrofories
       sort_files(date_files,0 ,n_files-1); //sort by date gia pio swsto parsing
+      dsums[i] = new directory_summary(n_files, countries[i]);
       for(int j=0; j<n_files; j++){
         summary_entries=0; //gia na kserw ti tha pw sto gonio
         file_summary * mysum = new file_summary; //boh8htikh domh gia to summary poy tha stelnei meta apo kathe arxeio sto gonio
         strcpy(jbuf, "");
         sprintf(jbuf, "%s/%s",sbuf, (date_files[j]).c_str());
         parse_records_from_file(std::string(jbuf), date_files[j] ,countries[i], &records_htable, &diseases_htable, &countries_htable ,mysum);
-        delete mysum;
+        dsums[i]->filenames[j] = date_files[j];
+        dsums[i]->nodes_per_file[j] = summary_entries;
+        dsums[i]->tfile_sums[j] = mysum;
+        //steile sto gonio to summary apotelesma na to ektypwsei
+        //send_file_summary(write_fd, summary_entries, date_files[j], countries[i], mysum, bsize);
+        //delete mysum;
       }
 
       //std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
       delete[] date_files; //sbhse to new poy egine
     }
-    //close(read_fd); //to afhnw anoixto
+
     //populate_other_HTs(&records_htable, &diseases_htable, &countries_htable); //perna tis eggrafes sou kai stous allous 2 pinakes askhshs 1
     //records_htable.print_contents();
     //diseases_htable.print_contents();
     //countries_htable.print_contents();
 
     //STELNW STO GONIO TA SUMMARY STATISTICS
+    for(int i=0; i<n_dirs; i++){
+      for(int j=0; j<dsums[i]->nfiles; j++){
+        std::cout << dsums[i]->filenames[j] << "\n";
+        std::cout << dsums[i]->countryname << "\n";
+        file_summary * cptr = dsums[i]->tfile_sums[j];
+        for(int k=0; k<dsums[i]->nodes_per_file[j]; k++){
+          std::cout << cptr->diseasename << "\n";
+          std::cout << cptr->age_cats[0] << "\n";
+          std::cout << cptr->age_cats[1] << "\n";
+          std::cout << cptr->age_cats[2] << "\n";
+          std::cout << cptr->age_cats[3] << "\n";
+          std::cout << "\n";
+          cptr = cptr->next;
+        }
+        std::cout << "\n";
+      }
+      std::cout << "\n";
+    }
+
 
     //enhmerwnw gonio oti teleiwsa to parsing
     send_string(write_fd, "ok", bsize);

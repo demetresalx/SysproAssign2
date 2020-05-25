@@ -16,8 +16,7 @@ void foo(int signo){
   //signal(signo, foo);
   glob_counter++;
 }
-//ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
-//PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
+
 
 //sunarthsh poy kanei ROUND-ROBIN share ta directories sta paidia-workers
 int share_dirs(int *dpw, int ndirs, int ws){
@@ -31,8 +30,7 @@ int share_dirs(int *dpw, int ndirs, int ws){
 }
 
 
-//ARTIOI = GONIOS DIABAZEI, PAIDI GRAFEI
-//PERITTOI = GONIOS GRAFEI, PAIDI DIABAZEI
+
 int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, int * pids){
   //struct sigaction first_act; //gia xeirismo SIGUSR1 arxika
   //sigfillset(&(first_act.sa_mask));
@@ -41,21 +39,18 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   //signal(SIGUSR1, foo);
 
   char abuf[300]; //ergaleio gia reading apo pipes ktl
-  std::string tool3 = ""; //to idio
   std::string * subdirs = NULL; //tha mpoun ta subdir names
   int * dirs_per_wrk = new int[wnum](); //gia na dw an teleiwse me tous katalogous gia to i paidi, initialized to 0
   int dirs_n=0;
   extract_files(in_dir, &dirs_n, &subdirs); //euresh dirs
   share_dirs(dirs_per_wrk, dirs_n, wnum); //katanomh dirs
 
-  struct pollfd pipe_fds[2*wnum]; //ta file descriptors twn pipes poy tha mpoyn kai sthn poll
-  //stelnw sta paidia ena gramma kai to pairnw pisw gia na dw oti ta pipes einai ok kai na krathsw tis times twn fds tous
+  struct pollfd pipe_rfds[wnum]; //ta read fds twn pipes poy tha mpoyn kai sthn poll
+  struct pollfd pipe_wfds[wnum]; //ta write fds antistoixa, auta mallon de tha xreiastoun poll giati ta paidia diabazoun mono apo enan
+  //anoigw ta pipes kai krataw tous fds tous
   for(int i=0; i< wnum; i++){
-    pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY ); //anoigma kathe pipe pros ta paidia gia grapsimo
-    send_string(pipe_fds[2*i +1].fd, "o", bsize);
-    pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY );
-    receive_string(pipe_fds[2*i].fd, &tool3, bsize );
-    //std::cout << "phra apo to paidi moy " << tool3 << "\n";
+    pipe_wfds[i].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY ); //anoigma kathe pipe pros ta paidia gia grapsimo
+    pipe_rfds[i].fd = open(pipe_names[2*i].c_str(), O_RDONLY );
   }
 
 
@@ -64,16 +59,16 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   //ROUND-ROBIN KATANOMH YPO-KATALOGWN-XWRWN
   int dirs_writ = 0;
   for(int i=0; i<wnum; i++){
-    //pipe_fds[2*i +1].events = POLLOUT; //arxikopoiw gia thn poll
+    //pipe_wfds[i].events = POLLOUT; //arxikopoiw gia thn poll
     //gia paidi i, grafw sto 2*i +1, diabazw apo to 2*
-    write(pipe_fds[2*i +1].fd, &(dirs_per_wrk[i]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
+    write(pipe_wfds[i].fd, &(dirs_per_wrk[i]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
     //std::cout << dirs_per_wrk[i];
     for(int j=0; j< dirs_per_wrk[i]; j++){
       sprintf(abuf, "%s/%s", in_dir,(subdirs[dirs_writ]).c_str() ); //pairnw to dir_name kai to bazw mazi me to inputdir (ftiaxnw path)
       //std::cout << "ok";
-      send_string(pipe_fds[2*i +1].fd, &(subdirs[dirs_writ]), bsize); //steile onoma xwras sketo
-      send_string(pipe_fds[2*i +1].fd, abuf, bsize); //steile to path
-      //write(pipe_fds[2*i +1].fd, abuf, strlen(abuf)+1 ); //grapse to directory name
+      send_string(pipe_wfds[i].fd, &(subdirs[dirs_writ]), bsize); //steile onoma xwras sketo
+      send_string(pipe_wfds[i].fd, abuf, bsize); //steile to path
+      //write(pipe_wfds[i].fd, abuf, strlen(abuf)+1 ); //grapse to directory name
       //std::cout << "egarpsa to " << subdirs[dirs_writ] << "\n";
       dirs_writ++;
     }
@@ -88,7 +83,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
   //sigourepsou (mesw blocking pipes) oti de tha proxwrhseis prin ola ta paidia teleiwsoun to parsing
   for(int i=0; i<wnum; i++){
-    receive_string(pipe_fds[2*i].fd, &tool, bsize);
+    receive_string(pipe_rfds[i].fd, &tool, bsize);
     if(tool == "ok") //teleiwse to parsing to paidi
       glob_counter++;
   }
@@ -106,7 +101,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       //for(int i=0; i<wnum; i++)
         //kill(pids[i], SIGKILL);
       for(int i=0; i<wnum; i++)
-        send_string(pipe_fds[2*i +1].fd, &line, bsize);
+        send_string(pipe_wfds[i].fd, &line, bsize);
       break;
     }
     else{ //arxizoun oi entoles
@@ -124,29 +119,29 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
               std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
               for(int i=0; i<wnum; i++)
-                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+                send_string(pipe_wfds[i].fd, "bad", bsize);
               failed++;//apotuxia
               continue;
             }
             if((requ[2] == "-") || requ[3]== "-"){
               std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
               for(int i=0; i<wnum; i++)
-                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+                send_string(pipe_wfds[i].fd, "bad", bsize);
               failed++;//apotuxia
               continue;
             }
             //prow9hse to aithma sta children mesw pipe
             for(int i=0; i<wnum; i++){
-              send_string(pipe_fds[2*i +1].fd, "/diseaseFrequency1", bsize);//steile thn entolh
-              send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
-              send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
-              send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+              send_string(pipe_wfds[i].fd, "/diseaseFrequency1", bsize);//steile thn entolh
+              send_string(pipe_wfds[i].fd, &requ[1], bsize);//steile disease
+              send_string(pipe_wfds[i].fd, &requ[2], bsize);//steile date1
+              send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
             }
             //pare apanthsh
             int intreader=0;
             int intreader2=0;
             for(int i=0; i<wnum; i++){ //pare ton arithmo
-                read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+                read(pipe_rfds[i].fd, &intreader, sizeof(int));
                 intreader2 += intreader;
             }
             std::cout << intreader2 << "\n";
@@ -156,30 +151,30 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
               std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
               for(int i=0; i<wnum; i++)
-                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+                send_string(pipe_wfds[i].fd, "bad", bsize);
               failed++;//apotuxia
               continue;
             }
             if((requ[2] == "-") || requ[3]== "-"){
               std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
               for(int i=0; i<wnum; i++)
-                send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+                send_string(pipe_wfds[i].fd, "bad", bsize);
               failed++;//apotuxia
               continue;
             }
             //prow9hse to aithma sta children mesw pipe
             for(int i=0; i<wnum; i++){
-              send_string(pipe_fds[2*i +1].fd, "/diseaseFrequency2", bsize);//steile thn entolh
-              send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
-              send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
-              send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
-              send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile country
+              send_string(pipe_wfds[i].fd, "/diseaseFrequency2", bsize);//steile thn entolh
+              send_string(pipe_wfds[i].fd, &requ[1], bsize);//steile disease
+              send_string(pipe_wfds[i].fd, &requ[2], bsize);//steile date1
+              send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
+              send_string(pipe_wfds[i].fd, &requ[4], bsize);//steile country
             }
             //pare apanthsh
             int intreader=0;
             int intreader2=0;
             for(int i=0; i<wnum; i++){ //pare ton arithmo
-                read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+                read(pipe_rfds[i].fd, &intreader, sizeof(int));
                 intreader2 += intreader;
             }
             std::cout << intreader2 << "\n";
@@ -188,7 +183,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           else{//ekana lathos sthn entolh
             std::cout << "Lathos sta orismata. try again...\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
           }
       }//telos if diseaseFrequency
@@ -196,15 +191,15 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         if(ind == 1){
           //steile to aithma sta paidia
           for(int i=0; i<wnum; i++)
-            send_string(pipe_fds[2*i +1].fd, "/listCountries", bsize);
+            send_string(pipe_wfds[i].fd, "/listCountries", bsize);
 
           //pare tis apanthseis tous
           std::string countryandchild = "";
           int countries_per_child =0;
           for(int i=0; i<wnum; i++){
-            read(pipe_fds[2*i].fd, &countries_per_child, sizeof(int));
+            read(pipe_rfds[i].fd, &countries_per_child, sizeof(int));
             for(int j=0; j< countries_per_child; j++){
-              receive_string(pipe_fds[2*i].fd, &countryandchild ,bsize);
+              receive_string(pipe_rfds[i].fd, &countryandchild ,bsize);
               std::cout << countryandchild << "\n";
             }//telos for gia kathe xwra tou paidiou
           }//telos for gia kathe paidi
@@ -213,7 +208,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         else{//ekana lathos sthn entolh
           std::cout << "Lathos sta orismata. try again...\n";
           for(int i=0; i<wnum; i++)
-            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
 
@@ -222,13 +217,13 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         if(ind == 2){ //apodektos arithmos orismatwn
           //steile to aithma sta paidia
           for(int i=0; i<wnum; i++){
-            send_string(pipe_fds[2*i +1].fd, "/searchPatientRecord", bsize);
-            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize); //steile to id pros anazhthsh
+            send_string(pipe_wfds[i].fd, "/searchPatientRecord", bsize);
+            send_string(pipe_wfds[i].fd, &requ[1], bsize); //steile to id pros anazhthsh
           }
           //pare tis apanthseis
           std::string requested_record = "";
           for(int i=0; i<wnum; i++){
-            receive_string(pipe_fds[2*i].fd, &requested_record ,bsize);
+            receive_string(pipe_rfds[i].fd, &requested_record ,bsize);
             if(requested_record == "nope")
               continue;
             else
@@ -239,7 +234,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         else{//ekana lathos sthn entolh
           std::cout << "Lathos sta orismata. try again...\n";
           for(int i=0; i<wnum; i++)
-            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
 
@@ -249,14 +244,14 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           if((dates_compare(requ[4], requ[5]) != "smaller") && (dates_compare(requ[4], requ[5]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           if((requ[4] == "-") || requ[5]== "-"){
             std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
@@ -264,28 +259,28 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           if((kapa < 1)||(kapa > 4)){ //lathos timh k
             std::cout << "k must be integer in range [1, 4]\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           //steile to aithma stous workers
           for(int i=0; i<wnum; i++){
-            send_string(pipe_fds[2*i +1].fd, "/topk-AgeRanges", bsize);//steile thn entolh
-            write(pipe_fds[2*i +1].fd, &kapa, sizeof(int));//steile k
-            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile country
-            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile disease
-            send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile date1
-            send_string(pipe_fds[2*i +1].fd, &requ[5], bsize);//steile date2
+            send_string(pipe_wfds[i].fd, "/topk-AgeRanges", bsize);//steile thn entolh
+            write(pipe_wfds[i].fd, &kapa, sizeof(int));//steile k
+            send_string(pipe_wfds[i].fd, &requ[2], bsize);//steile country
+            send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile disease
+            send_string(pipe_wfds[i].fd, &requ[4], bsize);//steile date1
+            send_string(pipe_wfds[i].fd, &requ[5], bsize);//steile date2
           }
           //pare kai ektupwse ta apotelesmata
           for(int i=0; i<wnum; i++)
-            read_and_present_topk(pipe_fds[2*i].fd);
+            read_and_present_topk(pipe_rfds[i].fd);
           successful++;//epituxia
         }
         else{//ekana lathos sthn entolh
           std::cout << "Lathos sta orismata. try again...\n";
           for(int i=0; i<wnum; i++)
-            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
 
@@ -295,27 +290,27 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           if((requ[2] == "-") || requ[3]== "-"){
             std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           //prow9hse to aithma sta children mesw pipe
           for(int i=0; i<wnum; i++){
-            send_string(pipe_fds[2*i +1].fd, "/numPatientAdmissions1", bsize);//steile thn entolh
-            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
-            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
-            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+            send_string(pipe_wfds[i].fd, "/numPatientAdmissions1", bsize);//steile thn entolh
+            send_string(pipe_wfds[i].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_wfds[i].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
           }
           //pare apanthsh
           for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read_and_present_num_adms_disch(pipe_fds[2*i].fd, bsize);
+              read_and_present_num_adms_disch(pipe_rfds[i].fd, bsize);
           }
           successful++;//epituxia
         }
@@ -323,30 +318,30 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           if((requ[2] == "-") || requ[3]== "-"){
             std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           //prow9hse to aithma sta children mesw pipe
           for(int i=0; i<wnum; i++){
-            send_string(pipe_fds[2*i +1].fd, "/numPatientAdmissions2", bsize);//steile thn entolh
-            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
-            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
-            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
-            send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile country
+            send_string(pipe_wfds[i].fd, "/numPatientAdmissions2", bsize);//steile thn entolh
+            send_string(pipe_wfds[i].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_wfds[i].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
+            send_string(pipe_wfds[i].fd, &requ[4], bsize);//steile country
           }
           //pare apanthsh
           int intreader=0;
           int intreader2=0;
           for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+              read(pipe_rfds[i].fd, &intreader, sizeof(int));
               intreader2 += intreader;
           }
           std::cout << intreader2 << "\n";
@@ -355,7 +350,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         else{//ekana lathos sthn entolh
           std::cout << "Lathos sta orismata. try again...\n";
           for(int i=0; i<wnum; i++)
-            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
       } //telos numPatientAdmissions
@@ -364,27 +359,27 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           if((requ[2] == "-") || requ[3]== "-"){
             std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           //prow9hse to aithma sta children mesw pipe
           for(int i=0; i<wnum; i++){
-            send_string(pipe_fds[2*i +1].fd, "/numPatientDischarges1", bsize);//steile thn entolh
-            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
-            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
-            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
+            send_string(pipe_wfds[i].fd, "/numPatientDischarges1", bsize);//steile thn entolh
+            send_string(pipe_wfds[i].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_wfds[i].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
           }
           //pare apanthsh
           for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read_and_present_num_adms_disch(pipe_fds[2*i].fd, bsize);
+              read_and_present_num_adms_disch(pipe_rfds[i].fd, bsize);
           }
           successful++;//epituxia
         }
@@ -392,30 +387,30 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           if((requ[2] == "-") || requ[3]== "-"){
             std::cout << "Date1 and Date2 can't be - , it's supposed to be an INTERVAL\n";
             for(int i=0; i<wnum; i++)
-              send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+              send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
             continue;
           }
           //prow9hse to aithma sta children mesw pipe
           for(int i=0; i<wnum; i++){
-            send_string(pipe_fds[2*i +1].fd, "/numPatientDischarges2", bsize);//steile thn entolh
-            send_string(pipe_fds[2*i +1].fd, &requ[1], bsize);//steile disease
-            send_string(pipe_fds[2*i +1].fd, &requ[2], bsize);//steile date1
-            send_string(pipe_fds[2*i +1].fd, &requ[3], bsize);//steile date2
-            send_string(pipe_fds[2*i +1].fd, &requ[4], bsize);//steile country
+            send_string(pipe_wfds[i].fd, "/numPatientDischarges2", bsize);//steile thn entolh
+            send_string(pipe_wfds[i].fd, &requ[1], bsize);//steile disease
+            send_string(pipe_wfds[i].fd, &requ[2], bsize);//steile date1
+            send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
+            send_string(pipe_wfds[i].fd, &requ[4], bsize);//steile country
           }
           //pare apanthsh
           int intreader=0;
           int intreader2=0;
           for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read(pipe_fds[2*i].fd, &intreader, sizeof(int));
+              read(pipe_rfds[i].fd, &intreader, sizeof(int));
               intreader2 += intreader;
           }
           std::cout << intreader2 << "\n";
@@ -424,14 +419,14 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
         else{//ekana lathos sthn entolh
           std::cout << "Lathos sta orismata. try again...\n";
           for(int i=0; i<wnum; i++)
-            send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+            send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
       }//telos numPatientDischarges
       else{
         std::cout << "kakws orismenh entolh\n";
         for(int i=0; i<wnum; i++)
-          send_string(pipe_fds[2*i +1].fd, "bad", bsize);
+          send_string(pipe_wfds[i].fd, "bad", bsize);
         failed++;//apotuxia
       }//telos if gia to poia kai pws einai h nonexit entolh
     }//telos else gia to an einai nonexit entolh
@@ -448,8 +443,8 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
   //sleep(5);
   for(int i=0; i<wnum; i++){
-    close(pipe_fds[2*i].fd);
-    close(pipe_fds[2*i +1].fd);
+    close(pipe_rfds[i].fd);
+    close(pipe_wfds[i].fd);
   }
 
 return 0;
