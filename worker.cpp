@@ -129,9 +129,6 @@ int work(char * read_pipe, char * write_pipe, int bsize){
         dsums[i]->filenames[j] = date_files[j];
         dsums[i]->nodes_per_file[j] = summary_entries;
         dsums[i]->tfile_sums[j] = mysum;
-        //steile sto gonio to summary apotelesma na to ektypwsei
-        //send_file_summary(write_fd, summary_entries, date_files[j], countries[i], mysum, bsize);
-        //delete mysum;
       }
 
       //std::cout << getpid() << " diabasa dir ap par " << sbuf << "\n";
