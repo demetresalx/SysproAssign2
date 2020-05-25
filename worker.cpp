@@ -102,11 +102,15 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   record_HT records_htable(50); //o DIKOS MOU HT gia tis eggrafes basei recordID megethous h1+h2. KALUTEROS APO APLH LISTA
   diseaseHashTable diseases_htable(25, 64); //O erg1 HT GIA DISEASE
   countryHashTable countries_htable(25, 64); //O erg1 HT GIA COUNTRY
-
-
-
-  //DIABAZW DIRECTORIES POY MOY EDWSE O GONIOS
+  //anoigw tous descriptors gia na tous exw
+    //diabzw k stelnw pisw kati gia na dw oti ta pipes einai ok kai krataw tis times twn fds tous
     read_fd = open(read_pipe, O_RDONLY );
+    std::string maxtool;
+    receive_string(read_fd, &maxtool, bsize);
+    write_fd = open(write_pipe, O_WRONLY);
+    send_string(write_fd, &maxtool, bsize);
+
+    //DIABAZW DIRECTORIES POY MOY EDWSE O GONIOS
     read(read_fd, &n_dirs, sizeof(int));
     std::string * countries = new std::string[n_dirs]; //onomata xwrwn poy exw
     std::string * date_files = NULL; //tha mpoun ta filesnames-hmeromhnies
@@ -137,12 +141,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
     //STELNW STO GONIO TA SUMMARY STATISTICS
 
     //enhmerwnw gonio oti teleiwsa to parsing
-    write_fd = open(write_pipe, O_WRONLY );
-    //write(write_fd, "meow", strlen("mewo") +1);
     send_string(write_fd, "ok", bsize);
-    //close(write_fd); // to afhnw anoixto
-
-  //sleep(4);
 
   strcpy(sbuf, "");
   char sbuf2[200];
@@ -298,7 +297,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           successful++; //epituxia
         }//telos numPatientDischarges2
         else{
-          std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
+          ;;//std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
         }
 
 
@@ -309,7 +308,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
 
   close(read_fd);
   close(write_fd);
-  //std::cout << "eftasa\n";
+
   return 0;
 
 

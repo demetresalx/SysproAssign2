@@ -41,6 +41,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   //signal(SIGUSR1, foo);
 
   char abuf[300]; //ergaleio gia reading apo pipes ktl
+  std::string tool3 = ""; //to idio
   std::string * subdirs = NULL; //tha mpoun ta subdir names
   int * dirs_per_wrk = new int[wnum](); //gia na dw an teleiwse me tous katalogous gia to i paidi, initialized to 0
   int dirs_n=0;
@@ -48,13 +49,21 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   share_dirs(dirs_per_wrk, dirs_n, wnum); //katanomh dirs
 
   struct pollfd pipe_fds[2*wnum]; //ta file descriptors twn pipes poy tha mpoyn kai sthn poll
+  //stelnw sta paidia ena gramma kai to pairnw pisw gia na dw oti ta pipes einai ok kai na krathsw tis times twn fds tous
+  for(int i=0; i< wnum; i++){
+    pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY ); //anoigma kathe pipe pros ta paidia gia grapsimo
+    send_string(pipe_fds[2*i +1].fd, "o", bsize);
+    pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY );
+    receive_string(pipe_fds[2*i].fd, &tool3, bsize );
+    //std::cout << "phra apo to paidi moy " << tool3 << "\n";
+  }
+
 
   if(dirs_n == 0) //lathos
     {std::cout << "empty dir!!\n"; delete[] subdirs;return 1;}
   //ROUND-ROBIN KATANOMH YPO-KATALOGWN-XWRWN
   int dirs_writ = 0;
   for(int i=0; i<wnum; i++){
-    pipe_fds[2*i +1].fd = open(pipe_names[2*i +1].c_str(), O_WRONLY ); //anoigma kathe pipe pros ta paidia gia grapsimo
     //pipe_fds[2*i +1].events = POLLOUT; //arxikopoiw gia thn poll
     //gia paidi i, grafw sto 2*i +1, diabazw apo to 2*
     write(pipe_fds[2*i +1].fd, &(dirs_per_wrk[i]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
@@ -69,22 +78,19 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       dirs_writ++;
     }
 
-    //close(pipe_fds[2*i +1].fd);//afhnw anoixta
-
   }//telos for gia moirasma directories
   delete[] dirs_per_wrk;
   delete[] subdirs; //apodesmeush axreiastou pleon pinaka
 
   std::string tool;
+  //EDW DIABAZW SUMMARY STATISTICS KAI EKTYPWNW, ISWS POLL
 
 
   //sigourepsou (mesw blocking pipes) oti de tha proxwrhseis prin ola ta paidia teleiwsoun to parsing
   for(int i=0; i<wnum; i++){
-    pipe_fds[2*i].fd = open(pipe_names[2*i].c_str(), O_RDONLY );
     receive_string(pipe_fds[2*i].fd, &tool, bsize);
     if(tool == "ok") //teleiwse to parsing to paidi
       glob_counter++;
-    //close(pipe_fds[2*i].fd);//afhnw anoixta
   }
   if(glob_counter ==wnum)
     std::cout << "parsing donezo!\n";
