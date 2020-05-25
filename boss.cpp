@@ -11,11 +11,7 @@
 
 int glob_counter=0; //gia na perimenei oti ola ta paidia einai ok
 
-//xeirismos SIGUSR1 gia na fanei oti ena paidi etoimasthke
-void foo(int signo){
-  //signal(signo, foo);
-  glob_counter++;
-}
+
 
 
 //sunarthsh poy kanei ROUND-ROBIN share ta directories sta paidia-workers
@@ -74,12 +70,20 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     }
 
   }//telos for gia moirasma directories
-  delete[] dirs_per_wrk;
-  delete[] subdirs; //apodesmeush axreiastou pleon pinaka
+
 
   std::string tool;
   //EDW DIABAZW SUMMARY STATISTICS KAI EKTYPWNW, ISWS POLL
-
+  for(int i=0; i<wnum; i++){
+    for(int j=0; j< dirs_per_wrk[i]; j++){
+      int nfls =0;
+      read(pipe_rfds[i].fd, &nfls, sizeof(int));
+      for(int k=0; k<nfls; k++)
+        receive_and_print_file_summary(pipe_rfds[i].fd, bsize);
+    }
+  }
+  delete[] dirs_per_wrk;
+  delete[] subdirs; //apodesmeush axreiastou pleon pinaka
 
   //sigourepsou (mesw blocking pipes) oti de tha proxwrhseis prin ola ta paidia teleiwsoun to parsing
   for(int i=0; i<wnum; i++){

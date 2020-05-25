@@ -145,25 +145,16 @@ int work(char * read_pipe, char * write_pipe, int bsize){
 
     //STELNW STO GONIO TA SUMMARY STATISTICS
     for(int i=0; i<n_dirs; i++){
+      write(write_fd, &(dsums[i]->nfiles), sizeof(int));
+      //send_string(write_fd,  ,bsize)
       for(int j=0; j<dsums[i]->nfiles; j++){
-        std::cout << dsums[i]->filenames[j] << "\n";
-        std::cout << dsums[i]->countryname << "\n";
-        file_summary * cptr = dsums[i]->tfile_sums[j];
-        for(int k=0; k<dsums[i]->nodes_per_file[j]; k++){
-          std::cout << cptr->diseasename << "\n";
-          std::cout << cptr->age_cats[0] << "\n";
-          std::cout << cptr->age_cats[1] << "\n";
-          std::cout << cptr->age_cats[2] << "\n";
-          std::cout << cptr->age_cats[3] << "\n";
-          std::cout << "\n";
-          cptr = cptr->next;
-        }
-        std::cout << "\n";
+        send_file_summary(write_fd, dsums[i]->nodes_per_file[j], dsums[i]->filenames[j], dsums[i]->countryname, dsums[i]->tfile_sums[j], bsize);
       }
-      std::cout << "\n";
+      //std::cout << "\n";
     }
 
-
+    for(int i=0; i<n_dirs; i++)
+      delete dsums[i]; //ME DESTRUCTORS THS C++ OLH H DESMEUMENH KATHARIZEII, des ~directory_summary
     //enhmerwnw gonio oti teleiwsa to parsing
     send_string(write_fd, "ok", bsize);
 
@@ -261,6 +252,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
           countries_htable.topk_age_ranges(kapa, country, disease, date1, date2, &fetched, resul_arr, fresul_arr);
           deliver_topk(write_fd, fetched, resul_arr, fresul_arr); //steile apotelesmata ston patera
           delete[] resul_arr;
+          delete[] fresul_arr;
         }//telos topk
         else if(tool == "/numPatientAdmissions1"){ //xwris country
           std::string dis_name;
