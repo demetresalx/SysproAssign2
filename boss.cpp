@@ -84,25 +84,26 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     }
   }*/
   //KANW POLL GIA SUMMARIES!! Etsi mporw na diabazw prwta ta summaries twn paidiwn poy exoun teleiwsei
-  int already_read[wnum];
-  memset(already_read, 0, sizeof(already_read)); // for automatically-allocated arrays
+  int already_read[wnum]; //mh diabaseis ksana to idio paidi
+  memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
 
   while(kids_read < wnum){
-
+    //arxikopoihsh se kathe loupa gia thn poll
     for(int i=0; i<wnum; i++)
      pipe_rfds[i].events = POLLIN;
 
-    int rc = poll(pipe_rfds, wnum, 2000);
+    int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
     if(rc == 0)
       std::cout << "timeout\n";
-    else{
+    else{//tsekarw poioi einai etoimoi
       for(int i=0; i<wnum; i++){
+        //an einai etoimo kai den to exw ksanadiabasei
         if((pipe_rfds[i].revents == POLLIN)&&(already_read[i] == 0)){
           for(int j=0; j< dirs_per_wrk[i]; j++){
             int nfls =0;
             read(pipe_rfds[i].fd, &nfls, sizeof(int));
             for(int k=0; k<nfls; k++)
-              receive_and_print_file_summary(pipe_rfds[i].fd, bsize);
+              receive_and_print_file_summary(pipe_rfds[i].fd, bsize); //ektupwse to summary
           }
           kids_read++;
           already_read[i] = 1;
