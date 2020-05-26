@@ -7,13 +7,16 @@
 #include <dirent.h> //gia DIRECTORIES
 #include <sstream>
 
-void myhand(int ); //o handler
+//gia th dhimourgia logfile
+int create_logfile(int , int , std::string *, int );
+
+
 //OI PARAKATW SUNARTHSEIS EINAI OLES LOW LEVEL I/O APO PIPIES. DES TO .CPP GIA DETAILS
-//grapse string se pipe me akribh tropo. isws de xreiastei
+//grapse string se pipe me akribh tropo
 int send_string(int , char *, int );
 int send_string(int , std::string *, int );
 
-//diabase string se pipe me akribh tropo. isws de xreiastei
+//diabase string se pipe me akribh tropo.
 int receive_string(int, char *,int);
 int receive_string(int, std::string *,int);
 

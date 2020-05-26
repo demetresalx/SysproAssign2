@@ -11,6 +11,11 @@
 
 int glob_counter=0; //gia na perimenei oti ola ta paidia einai ok
 
+int quitflag =0; //gia na kserw an tha grapsw log kai kleinw
+
+void quit_hdl(int signo){
+  quitflag=1; //gia na kserei sth megalh while ti tha kanei to paidi
+}
 
 
 
@@ -28,11 +33,12 @@ int share_dirs(int *dpw, int ndirs, int ws){
 
 
 int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, int * pids){
-  //struct sigaction first_act; //gia xeirismo SIGUSR1 arxika
-  //sigfillset(&(first_act.sa_mask));
-  //first_act.sa_handler = &foo ;//o handler moy
-  //sigaction(SIGUSR1, &first_act, NULL); //to orisame!
-  //signal(SIGUSR1, foo);
+  //SIGNAL HANDLERS MOY gia SIGINT/SIGQUIT
+  struct sigaction actquit;
+  sigfillset(&(actquit.sa_mask)); //otan ekteleitai o handler thelw na blockarw ta panta
+  actquit.sa_handler = quit_hdl;
+  sigaction(SIGINT, &actquit, NULL); //to orisame!
+  sigaction(SIGQUIT, &actquit, NULL); //to orisame!
 
   char abuf[300]; //ergaleio gia reading apo pipes ktl
   std::string * subdirs = NULL; //tha mpoun ta subdir names
@@ -40,7 +46,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   int dirs_n=0;
   extract_files(in_dir, &dirs_n, &subdirs); //euresh dirs
   share_dirs(dirs_per_wrk, dirs_n, wnum); //katanomh dirs
-  std::string dirsofeach[wnum][dirs_n]; //xwres kathe paidiou gia SIGCHLD
+  std::string dirsofeach[wnum][dirs_n]; //xwres kathe paidiou gia log
   struct pollfd pipe_rfds[wnum]; //ta read fds twn pipes poy tha mpoyn kai sthn poll
   struct pollfd pipe_wfds[wnum]; //ta write fds antistoixa, auta mallon de tha xreiastoun poll giati ta paidia diabazoun mono apo enan
   //anoigw ta pipes kai krataw tous fds tous
@@ -66,7 +72,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       send_string(pipe_wfds[i].fd, abuf, bsize); //steile to path
       //write(pipe_wfds[i].fd, abuf, strlen(abuf)+1 ); //grapse to directory name
       //std::cout << "egarpsa to " << subdirs[dirs_writ] << "\n";
-      dirsofeach[i][j] = subdirs[dirs_writ]; //to krataw gia SIGCHLD
+      dirsofeach[i][j] = subdirs[dirs_writ]; //to krataw gia log
       dirs_writ++;
     }
 
@@ -476,16 +482,12 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       }//telos if gia to poia kai pws einai h nonexit entolh
     }//telos else gia to an einai nonexit entolh
 
-
-    //diabase apo paidi gia apanthseis, sumfwna me to prwtokollo ths ka8e mias
-
-
-
-
-
+    if(quitflag > 0) //fagame SIGINT/QUIT
+      break;
 
   }//telos while poy diabazei entoles
-
+  //grapse to log sou ws gonios
+  create_logfile(successful, failed, subdirs, dirs_writ);
   //sleep(5);
   for(int i=0; i<wnum; i++){
     close(pipe_rfds[i].fd);

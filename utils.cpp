@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <cstring>
+#include <fstream>
 #include "utils.h"
 
 //h aplh periptwsh me char *
@@ -462,4 +463,20 @@ directory_summary::~directory_summary(){
 void reset_poll_parameters(struct pollfd * pollfds, int length){
   for(int i=0; i<length; i++)
     pollfds[i].events = POLLIN;
+}
+
+
+//gia th dhimourgia logfile
+int create_logfile(int succ, int fail, std::string * countries, int length){
+  std::ofstream myfile;
+  std::string fname = "log_file." + std::to_string(getpid());
+  myfile.open(fname);
+  for(int i=0; i<length; i++){
+    myfile << countries[i] << "\n";
+  }
+  myfile << "TOTAL " << succ+fail << "\n";
+  myfile << "SUCCESS " << succ << "\n";
+  myfile << "FAIL " << fail << "\n";
+  myfile.close();
+  return 0;
 }
