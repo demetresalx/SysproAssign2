@@ -4,22 +4,15 @@
 #include <cstring>
 #include "utils.h"
 
-
+//h aplh periptwsh me char *
+//vasismeno se Marc J. Rochkind - Advanced UNIX Programming (2004, Addison-Wesley Professional) - selida 97
 int send_string(int fd, char * str, int b){
   ssize_t nwritten = 0, n;
-  int totalwr =0;
   int size = strlen(str) +1; //to mhkos poy prepei na steilei prwta
   int bwrit = write(fd, &size, sizeof(int));
   //stelnoyme twra to string
-
-
-
-
-  //bwrit = write(fd, str, size);
-  //std::cout << "parsize is " << size << "\n";
-  //std::cout << "egrapsa " << bwrit << "bytes\n";
-  //return totalwr;
-
+  //prosexw na mh grapsw perissotero ap oso xreiazetai
+  //grafw b bytes kathe fora mexri na parw to mhnyma me swstous elegxous
 
   int to_write=0;
   do {
@@ -28,20 +21,22 @@ int send_string(int fd, char * str, int b){
     else
       {to_write = b;}
 
+    //error handling gia th write
     if ((n = write(fd, &((const char *)str)[nwritten], to_write)) == -1) {
-      if (errno == EINTR)
+      if (errno == EINTR) //an diakopei apo signal
         continue;
         else
         return -1;
       }
     nwritten += n;
-  } while (nwritten < size);
+  } while (nwritten < size); //an osa exw grapsei mexri twra ftasan to swsto megethos, stamata
 
   return nwritten;
 
 }
 
 //to stelnei apo string gia anti gia char array
+//vasismeno se Marc J. Rochkind - Advanced UNIX Programming (2004, Addison-Wesley Professional) - selida 97
 int send_string(int fd, std::string * str, int b){
   ssize_t nwritten = 0, n;
   int size = str->length() +1; //to mhkos poy prepei na steilei prwta
@@ -50,34 +45,28 @@ int send_string(int fd, std::string * str, int b){
   //std::cout << *str;
   int bwrit = write(fd, &size, sizeof(int));
   //stelnoyme twra to string
-
-
-
-
-  //bwrit = write(fd, a, size);
-  //std::cout << "parsize is " << size << "\n";
-  //std::cout << "egrapsa " << bwrit << "bytes\n";
-  //return totalwr;
+  //prosexw na mh grapsw perissotero ap oso xreiazetai
+  //grafw b bytes kathe fora mexri na parw to mhnyma me swstous elegxous
 
   int to_write=0;
   do {
+    //apofasisw an me pairnei na grapsw b h to mhnyma teleiwnei se ligotera
     if(size-nwritten <= b)
       to_write = size-nwritten;
     else
       {to_write = b;}
 
+    //error handling gia th write
     if ((n = write(fd, &((const char *)a)[nwritten], to_write)) == -1) {
-      if (errno == EINTR)
+      if (errno == EINTR) //an diakopei apo signal
         continue;
         else
         return -1;
       }
     nwritten += n;
-  } while (nwritten < size);
+  } while (nwritten < size); //an osa exw grapsei mexri twra ftasan to swsto megethos, stamata
 
   return nwritten;
-
-
 
 }
 
@@ -92,13 +81,15 @@ int receive_string(int fd, char * buf, int b){
 
   int to_read=0;
   do {
+    //apofasisw an me pairnei na diabasw b h to mhnyma teleiwnei se ligotera
     if(size-nread <= b)
       to_read = size-nread;
     else
       to_read = b;
 
+      //error handling ths read
     if ((n = read(fd, &((char *)buf)[nread], to_read)) == -1) {
-      if (errno == EINTR)
+      if (errno == EINTR) //an diakopei apo signal
         continue;
       else
         return -1;
@@ -106,7 +97,7 @@ int receive_string(int fd, char * buf, int b){
     if (n == 0)
       return nread;
     nread += n;
-  } while (nread < size);
+  } while (nread < size); //stamata otan diabaseis to akribes megethos mhnymatos se bytes
 
   return nread;
 
@@ -124,13 +115,15 @@ int receive_string(int fd, std::string * str, int b){
 
   int to_read=0;
   do {
+    //apofasisw an me pairnei na diabasw b h to mhnyma teleiwnei se ligotera
     if(size-nread <= b)
       to_read = size-nread;
     else
       {to_read = b;}
 
+      //error handling ths read
     if ((n = read(fd, &((char *)tool)[nread], to_read)) == -1) {
-      if (errno == EINTR)
+      if (errno == EINTR) //an diakopei apo signal
         continue;
       else
         return -1;
@@ -139,7 +132,7 @@ int receive_string(int fd, std::string * str, int b){
       return nread;
     nread += n;
     *str = std::string(tool);
-  } while (nread < size);
+  } while (nread < size); //stamata otan diabaseis to akribes megethos mhnymatos se bytes
 
   return nread;
 

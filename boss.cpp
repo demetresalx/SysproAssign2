@@ -40,7 +40,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   int dirs_n=0;
   extract_files(in_dir, &dirs_n, &subdirs); //euresh dirs
   share_dirs(dirs_per_wrk, dirs_n, wnum); //katanomh dirs
-
+  std::string dirsofeach[wnum][dirs_n]; //xwres kathe paidiou gia SIGCHLD
   struct pollfd pipe_rfds[wnum]; //ta read fds twn pipes poy tha mpoyn kai sthn poll
   struct pollfd pipe_wfds[wnum]; //ta write fds antistoixa, auta mallon de tha xreiastoun poll giati ta paidia diabazoun mono apo enan
   //anoigw ta pipes kai krataw tous fds tous
@@ -66,11 +66,11 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       send_string(pipe_wfds[i].fd, abuf, bsize); //steile to path
       //write(pipe_wfds[i].fd, abuf, strlen(abuf)+1 ); //grapse to directory name
       //std::cout << "egarpsa to " << subdirs[dirs_writ] << "\n";
+      dirsofeach[i][j] = subdirs[dirs_writ]; //to krataw gia SIGCHLD
       dirs_writ++;
     }
 
   }//telos for gia moirasma directories
-
 
   std::string tool;
   int kids_read =0;
