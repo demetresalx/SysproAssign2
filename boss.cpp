@@ -84,13 +84,15 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     }
   }*/
   //KANW POLL GIA SUMMARIES!! Etsi mporw na diabazw prwta ta summaries twn paidiwn poy exoun teleiwsei
+  //meta to kathe summary sigourepsou mesw named pipe oti to i paidi teleiwse
   int already_read[wnum]; //mh diabaseis ksana to idio paidi
+  int already_ok[wnum]; //twra gia na parei kai to mhyma oti to paidi teleiwse
   memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+  memset(already_ok, 0, sizeof(already_read)); // arxika ola adiabasta
 
   while(kids_read < wnum){
     //arxikopoihsh se kathe loupa gia thn poll
-    for(int i=0; i<wnum; i++)
-     pipe_rfds[i].events = POLLIN;
+      reset_poll_parameters(pipe_rfds, wnum);
 
     int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
     if(rc == 0)
@@ -98,15 +100,23 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     else{//tsekarw poioi einai etoimoi
       for(int i=0; i<wnum; i++){
         //an einai etoimo kai den to exw ksanadiabasei
-        if((pipe_rfds[i].revents == POLLIN)&&(already_read[i] == 0)){
-          for(int j=0; j< dirs_per_wrk[i]; j++){
-            int nfls =0;
-            read(pipe_rfds[i].fd, &nfls, sizeof(int));
-            for(int k=0; k<nfls; k++)
-              receive_and_print_file_summary(pipe_rfds[i].fd, bsize); //ektupwse to summary
+        if(pipe_rfds[i].revents == POLLIN){
+          if(already_read[i] == 0){ //pame gia ta summaries
+            for(int j=0; j< dirs_per_wrk[i]; j++){
+              int nfls =0;
+              read(pipe_rfds[i].fd, &nfls, sizeof(int));
+              for(int k=0; k<nfls; k++)
+                receive_and_print_file_summary(pipe_rfds[i].fd, bsize); //ektupwse to summary
+            }
+            already_read[i] = 1;
           }
-          kids_read++;
-          already_read[i] = 1;
+          //tsekarw kai to oti to paidi teleiwse genika
+          if(already_ok[i] == 0){
+            receive_string(pipe_rfds[i].fd, &tool, bsize);
+            if(tool == "ok") //teleiwse to parsing to paidi
+              {kids_read++; already_ok[i] = 1;}
+          }
+
         } //telos elegxou diathesimothtas fd
       }//telos for gia paidia
     } //telos else gia timeout ths poll
@@ -117,12 +127,12 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   delete[] subdirs; //apodesmeush axreiastou pleon pinaka
 
   //sigourepsou (mesw blocking pipes) oti de tha proxwrhseis prin ola ta paidia teleiwsoun to parsing
-  for(int i=0; i<wnum; i++){
+  /*for(int i=0; i<wnum; i++){
     receive_string(pipe_rfds[i].fd, &tool, bsize);
     if(tool == "ok") //teleiwse to parsing to paidi
       glob_counter++;
-  }
-  if(glob_counter ==wnum)
+  }*/
+  if(kids_read ==wnum)
     std::cout << "parsing donezo!\n";
 
   //ARXIZOUN OI ENTOLES

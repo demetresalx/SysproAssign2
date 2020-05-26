@@ -64,5 +64,7 @@ public:
 void send_file_summary(int , int ,std::string , std::string, file_summary *, int );
 //gia na ta diabazw k na ta parousiazw apo gonio
 void receive_and_print_file_summary(int , int );
+//gia na kanw reset ta poll events
+void reset_poll_parameters(struct pollfd *, int);
 
 #endif
