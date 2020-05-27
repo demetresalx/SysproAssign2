@@ -120,11 +120,9 @@ int main(int argc, char** argv){
   //Perimene kathe paidi kai sbhse ta pipes tou
   if(pid >0){ //parent
     for(int i=0; i<numWorkers; i++){
+      kill(pids[i], SIGKILL); //Mhdeia paidoktonos!!
       int stats;
-      int fpid= waitpid(-1, &stats, 0);
-      //release file descriptors
-      //close(pipe_fds[2*i]);
-      //close(pipe_fds[2*i +1]);
+      int fpid= waitpid(pids[i], &stats, 0);
       //unlink gia sbhsimo pipes tou kathe paidiou. Meta th wait to paidi tha exei teleiwsei kai den ta xrhsimopoiei pleon
       if( unlink(pipe_names[2*i]) < 0)
             perror("Error: Cannot unlink worker");

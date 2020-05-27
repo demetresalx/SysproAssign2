@@ -188,6 +188,8 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       rdb = receive_string(read_fd, &tool, bsize);
     }
 
+    if(quitflag1 > 0) //fagame SIGINT/QUIT
+      {std::cout << "ciao\n";break;}
 
     if(tool == "/exit"){
           //isws cleanup??

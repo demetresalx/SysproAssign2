@@ -31,3 +31,4 @@ clean:
 
 #valgrind
 #valgrind --leak-check=full ./diseaseAggregator -i /home/demetres/Desktop/bashforLarge/input_dir -w 3 -b 128
+#valgrind --leak-check=full ./diseaseAggregator -i ../inputs/ass2/input_dir -w 3 -b 128

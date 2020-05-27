@@ -153,10 +153,8 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
     //std::cout << "line is " << line << "\n";
     if((line == "/exit") || (quitflag >0)){ //telos
       //for(int i=0; i<wnum; i++)
-        //kill(pids[i], SIGKILL);
-      for(int i=0; i<wnum; i++)
-        send_string(pipe_wfds[i].fd, &line, bsize);
-      break;
+        //send_string(pipe_wfds[i].fd, &line, bsize);
+      break; //paei na grapsei to log kai meta ap th main sigkill sta paidia k wait
     }
     else{ //arxizoun oi entoles
       std::string const delims{ " \t\r\n" }; //delimiters einai ta: space,tab kai carriage return. TELOS.
