@@ -40,6 +40,9 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   sigaction(SIGINT, &actquit, NULL); //to orisame!
   sigaction(SIGQUIT, &actquit, NULL); //to orisame!
 
+  sigset_t allsigns; //thelw na blockarw shmata thn wra poy ekteleitai mia entolh
+  sigfillset(&allsigns); //twra exei ola ta shmata, otan xreiastei tha kanw sigprocmask
+
   char abuf[300]; //ergaleio gia reading apo pipes ktl
   std::string * subdirs = NULL; //tha mpoun ta subdir names
   int * dirs_per_wrk = new int[wnum](); //gia na dw an teleiwse me tous katalogous gia to i paidi, initialized to 0
@@ -148,7 +151,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
   while(getline(std::cin, line)){
     //std::cout << "line is " << line << "\n";
-    if(line == "/exit"){ //telos
+    if((line == "/exit") || (quitflag >0)){ //telos
       //for(int i=0; i<wnum; i++)
         //kill(pids[i], SIGKILL);
       for(int i=0; i<wnum; i++)
@@ -166,6 +169,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           ind++;
       }//telos while eksagwghs gnwrismatwn apo entolh
       if(requ[0] == "/diseaseFrequency"){
+          sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
           if(ind == 4){ //xwris to proairetiko country
             if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
               std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
@@ -237,8 +241,10 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
               send_string(pipe_wfds[i].fd, "bad", bsize);
             failed++;//apotuxia
           }
+          sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
       }//telos if diseaseFrequency
       else if(requ[0] == "/listCountries"){
+        sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
         if(ind == 1){
           //steile to aithma sta paidia
           for(int i=0; i<wnum; i++)
@@ -262,9 +268,10 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
-
+        sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
       }//telos if listCountries
       else if(requ[0] == "/searchPatientRecord"){
+        sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
         if(ind == 2){ //apodektos arithmos orismatwn
           //steile to aithma sta paidia
           for(int i=0; i<wnum; i++){
@@ -288,9 +295,10 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
-
+        sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
       }//telos searchPatientRecord
       else if(requ[0] == "/topk-AgeRanges"){
+        sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
         if(ind == 6){ //apodektos arithmos orismatwn
           if((dates_compare(requ[4], requ[5]) != "smaller") && (dates_compare(requ[4], requ[5]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
@@ -334,9 +342,10 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
-
+        sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
       }//telos topk
       else if(requ[0] == "/numPatientAdmissions"){
+        sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
         if(ind == 4){ //xwris to proairetiko country
           if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
@@ -404,8 +413,10 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
+        sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
       } //telos numPatientAdmissions
       else if(requ[0] == "/numPatientDischarges"){
+        sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
         if(ind == 4){ //xwris to proairetiko country
           if((dates_compare(requ[2], requ[3]) != "smaller") && (dates_compare(requ[2], requ[3]) != "equal") ){ //kakws orismeno date
             std::cout << "Date1 must be earlier or equal to Date2 or bad date\n";
@@ -473,6 +484,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, "bad", bsize);
           failed++;//apotuxia
         }
+        sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
       }//telos numPatientDischarges
       else{
         std::cout << "kakws orismenh entolh\n";

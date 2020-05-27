@@ -104,6 +104,9 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   sigaction(SIGINT, &actquit, NULL); //to orisame!
   sigaction(SIGQUIT, &actquit, NULL); //to orisame!
 
+  sigset_t allsigns; //thelw na blockarw shmata thn wra poy ekteleitai mia entolh
+  sigfillset(&allsigns); //twra exei ola ta shmata, otan xreiastei tha kanw sigprocmask
+
   int read_fd, write_fd;
   char sbuf[500];
   char jbuf[500];
@@ -176,6 +179,8 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   int failed = 0; //apotuxhmena erwthmata
   while(1){
 
+    if(quitflag1 > 0) //fagame SIGINT/QUIT
+      {std::cout << "ciao\n";break;}
 
     int rdb = receive_string(read_fd, &tool, bsize);
     while(tool == ""){
@@ -192,6 +197,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       failed++;//apotyxhmeno erwthma
     }
     else if(tool == "/diseaseFrequency1"){ //xwris orisma country
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       std::string dis_name;
       rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
       std::string date1;
@@ -202,8 +208,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       //std::cout << dis_name << " ^ " << number_to_present << "\n";
       write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
       successful++;//epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos if diseaseFrequency1
     else if(tool == "/diseaseFrequency2"){ //ME orisma country
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       std::string dis_name;
       rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
       std::string date1;
@@ -216,16 +224,20 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       //std::cout << dis_name << " ^ " << number_to_present << "\n";
       write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
       successful++; //epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos if diseaseFrequency2
     else if(tool == "/listCountries"){
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       write(write_fd, &n_dirs, sizeof(int)); //stelnw sto gonio poses xwres tha exw
       for(int i=0; i<n_dirs; i++){
         std::string countryandme = countries[i] + " " + std::to_string(getpid());
         send_string(write_fd, &countryandme, bsize);
       }
       successful++;//epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos if listCountries
     else if(tool == "/searchPatientRecord"){
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       std::string id_to_look_for = "";
       record * recptr = NULL; //gia ton entopismo eggrafhs
       rdb = receive_string(read_fd, &id_to_look_for, bsize); //diabase to zhtoumeno id
@@ -241,8 +253,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       else //den to brhke
         send_string(write_fd, "nope", bsize); //grapse oti de brhkes tpt
       successful++;//epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos if searchPatientRecord
     else if(tool == "/topk-AgeRanges"){
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       int kapa = 0;
       read(read_fd, &kapa, sizeof(int)); //pare timh k
       std::string country;
@@ -260,8 +274,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       deliver_topk(write_fd, fetched, resul_arr, fresul_arr); //steile apotelesmata ston patera
       delete[] resul_arr;
       delete[] fresul_arr;
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos topk
     else if(tool == "/numPatientAdmissions1"){ //xwris country
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       std::string dis_name;
       rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
       std::string date1;
@@ -275,8 +291,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       deliver_num_adms_disch1(write_fd, n_dirs, countries, country_admissions , bsize);
       delete[] country_admissions;
       successful++;//epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos numPatientAdmissions1
     else if(tool == "/numPatientAdmissions2"){
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       std::string dis_name;
       rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
       std::string date1;
@@ -289,8 +307,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       //std::cout << dis_name << " ^ " << number_to_present << "\n";
       write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
       successful++; //epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos numPatientAdmissions2
     else if(tool == "/numPatientDischarges1"){ //xwris country
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       std::string dis_name;
       rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
       std::string date1;
@@ -304,8 +324,10 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       deliver_num_adms_disch1(write_fd, n_dirs, countries, country_disch , bsize);
       delete[] country_disch;
       successful++;//epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos numPatientDischarges1
     else if(tool == "/numPatientDischarges2"){
+      sigprocmask(SIG_SETMASK, &allsigns, NULL) ; // disallow everything here !
       std::string dis_name;
       rdb = receive_string(read_fd, &dis_name, bsize); //diabase astheneia
       std::string date1;
@@ -318,13 +340,14 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       //std::cout << dis_name << " ^ " << number_to_present << "\n";
       write(write_fd, &number_to_present, sizeof(int)); //tou stelnw to zhtoumeno noumero
       successful++; //epituxia
+      sigprocmask(SIG_UNBLOCK, &allsigns, NULL) ; // allow them back here !
     }//telos numPatientDischarges2
     else{
       ;;//std::cout << "diabas apo gonio "<< tool << getpid() <<"\n";
     }
 
     if(quitflag1 > 0) //fagame SIGINT/QUIT
-      break;
+      {std::cout << "ciao\n";break;}
 
   }
 
@@ -332,6 +355,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   delete[] countries; //svhse to new poy egine
   close(read_fd);
   close(write_fd);
+
 
   return 0;
 
