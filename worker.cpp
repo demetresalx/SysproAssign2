@@ -78,7 +78,7 @@ void parse_records_from_file(std::string filename, std::string date, std::string
   //std::cout << "i was " << filename << " " << summ->diseasename <<" "<< summ->age_cats[0] << "\n";
 }
 
-int work(char * read_pipe, char * write_pipe, int bsize){
+int work(char * read_pipe, char * write_pipe, int bsize, int dosumms){
   //SIGNAL HANDLERS MOY gia SIGINT/SIGQUIT
   struct sigaction actquit;
   sigfillset(&(actquit.sa_mask)); //otan ekteleitai o handler thelw na blockarw ta panta
@@ -136,6 +136,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
     //countries_htable.print_contents();
 
     //STELNW STO GONIO TA SUMMARY STATISTICS
+  if(dosumms==0) //an eisai paidi poy eftiakse o gonios apo sigchld mhn kaneis ksanasumms
     for(int i=0; i<n_dirs; i++){
       write(write_fd, &(dsums[i]->nfiles), sizeof(int));
       //send_string(write_fd,  ,bsize)
@@ -340,7 +341,7 @@ int work(char * read_pipe, char * write_pipe, int bsize){
   close(write_fd);
 
 
-  return 0;
+  exit(0);
 
 
 }

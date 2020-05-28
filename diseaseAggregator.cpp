@@ -69,12 +69,12 @@ int main(int argc, char** argv){
     administrate(input_path, numWorkers , bufferSize ,pip_names, pids);
 
 
-    
+
   }
   else{ //child
 
     //douleia sto worker.cpp
-    work(pipe_names[2*child_index +1],pipe_names[2*child_index], bufferSize);
+    work(pipe_names[2*child_index +1],pipe_names[2*child_index], bufferSize, 0);
 
 
   }

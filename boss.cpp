@@ -4,9 +4,11 @@
 #include <errno.h> //perror
 #include <sys/types.h> //open
 #include <sys/stat.h> //open
+#include <sys/wait.h> //waitpid
 #include <fcntl.h> //open k flags
 #include <unistd.h> //read, write
 #include "boss.h"
+#include "worker.h"
 #include "utils.h"
 
 int glob_counter=0; //gia na perimenei oti ola ta paidia einai ok
@@ -17,7 +19,26 @@ void quit_hdl(int signo){
   quitflag=1; //gia na kserei sth megalh while ti tha kanei to paidi
 }
 
+int child_death =0; //gia xeirismo SIGCHLD
+int deadpid = -1;
 
+void chld_hdl(int signo){
+  signal(SIGCHLD, chld_hdl);
+  printf("Child died. Hit ENTER and wait until you are told to resume\n");
+  child_death=1; //flag gia na kserei ti na kanei meta
+  pid_t p;
+  int status;
+    //eipw8hke piazza oti de tha pethanoyn 2 tautoxrona
+    while(1){
+      p=waitpid(-1, &status, WNOHANG);
+      if(p <= 0)
+        break;
+      deadpid = p; //trackdown poio pethane
+
+    }
+
+
+}
 
 //sunarthsh poy kanei ROUND-ROBIN share ta directories sta paidia-workers
 int share_dirs(int *dpw, int ndirs, int ws){
@@ -120,9 +141,8 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   }//telos while
 
 
-  delete[] dirs_per_wrk;
-  delete[] subdirs; //apodesmeush axreiastou pleon pinaka
-
+  //GIA XEIRISMO SIGCHLD
+  signal(SIGCHLD, chld_hdl);
 
   if(kids_read ==wnum)
     std::cout << "Parsing complete. Start giving commands!\n";
@@ -133,6 +153,41 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   int successful=0;
 
   while(getline(std::cin, line)){
+    if(deadpid >0){ //fagame SIGCHLD, ftiaxnw neo child me ta dirs tou nekrou
+      //std::cout << "dwstouuuu\n";
+      int deadindex = -1;
+      for(int i=0; i< wnum; i++)
+        if(pids[i] == deadpid)
+          {deadindex = i; break;} //vrhka ti prepei na steilw sto neo paidi na kserei
+      int newpid = fork(); //ftiakse neo paidi!!
+      if(newpid >0){ //gonios
+        pids[deadindex] = newpid; //pairnei th 8esh otu paliou
+        //tou metaferei ta dirs tou paliou, DE THA MAS DWSEI KSANA TO IDIO SUMMARY
+        pipe_wfds[deadindex].fd = open(pipe_names[2*deadindex +1].c_str(), O_WRONLY);
+        write(pipe_wfds[deadindex].fd, &(dirs_per_wrk[deadindex]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
+        for(int i=0; i< dirs_per_wrk[deadindex]; i++){
+          sprintf(abuf, "%s/%s", in_dir,(dirsofeach[deadindex][i]).c_str() ); //pairnw to dir_name kai to bazw mazi me to inputdir (ftiaxnw path)
+          send_string(pipe_wfds[deadindex].fd, &(dirsofeach[deadindex][i]), bsize); //steile onoma xwras sketo
+          send_string(pipe_wfds[deadindex].fd, abuf, bsize); //steile to path
+        } //telos for poy paradidei ta directories toy paliou paidiou sto neo paidi
+        std::string isnewguyok ="";
+        //perimenw ok mesw blocking pipe apo to neo paidi oti parsare
+        pipe_rfds[deadindex].fd = open(pipe_names[2*deadindex].c_str(), O_RDONLY);
+        receive_string(pipe_rfds[deadindex].fd, &isnewguyok, bsize);
+        if(isnewguyok == "ok")
+          std::cout << "New worker replaced dead one. Resume orders.\n"; //ola kala!
+      }//telos if gonios sto sigchld
+      else if(newpid == 0){ //neo paidi
+        char rpp[100];
+        char wpp[100];
+        strcpy(rpp, pipe_names[2*deadindex +1].c_str()); strcpy(wpp, pipe_names[2*deadindex ].c_str());
+        work(rpp, wpp, bsize, 1);
+        //return 0;
+      }
+      else
+        perror("fork fail: ");
+      deadpid =-1;
+    } //telos if xeirismou SIGCHLD
     //std::cout << "line is " << line << "\n";
     if((line == "/exit") || (quitflag >0)){ //telos
       //for(int i=0; i<wnum; i++)
@@ -583,10 +638,47 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
     if(quitflag > 0) //fagame SIGINT/QUIT
       break;
+    if(deadpid >0){ //fagame SIGCHLD, ftiaxnw neo child me ta dirs tou nekrou
+      //std::cout << "dwstouuuu\n";
+      int deadindex = -1;
+      for(int i=0; i< wnum; i++)
+        if(pids[i] == deadpid)
+          {deadindex = i; break;} //vrhka ti prepei na steilw sto neo paidi na kserei
+      int newpid = fork(); //ftiakse neo paidi!!
+      if(newpid >0){ //gonios
+        pids[deadindex] = newpid; //pairnei th 8esh otu paliou
+        //tou metaferei ta dirs tou paliou, DE THA MAS DWSEI KSANA TO IDIO SUMMARY
+        pipe_wfds[deadindex].fd = open(pipe_names[2*deadindex +1].c_str(), O_WRONLY);
+        write(pipe_wfds[deadindex].fd, &(dirs_per_wrk[deadindex]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
+        for(int i=0; i< dirs_per_wrk[deadindex]; i++){
+          sprintf(abuf, "%s/%s", in_dir,(dirsofeach[deadindex][i]).c_str() ); //pairnw to dir_name kai to bazw mazi me to inputdir (ftiaxnw path)
+          send_string(pipe_wfds[deadindex].fd, &(dirsofeach[deadindex][i]), bsize); //steile onoma xwras sketo
+          send_string(pipe_wfds[deadindex].fd, abuf, bsize); //steile to path
+        } //telos for poy paradidei ta directories toy paliou paidiou sto neo paidi
+        std::string isnewguyok ="";
+        //perimenw ok mesw blocking pipe apo to neo paidi oti parsare
+        pipe_wfds[deadindex].fd = open(pipe_names[2*deadindex].c_str(), O_RDONLY);
+        receive_string(pipe_rfds[deadindex].fd, &isnewguyok, bsize);
+        if(isnewguyok == "ok")
+          std::cout << "New worker replaced dead one. Resume orders.\n"; //ola kala!
+      }//telos if gonios sto sigchld
+      else if(newpid == 0){ //neo paidi
+        char rpp[100];
+        char wpp[100];
+        strcpy(rpp, pipe_names[2*deadindex +1].c_str()); strcpy(wpp, pipe_names[2*deadindex ].c_str());
+        work(rpp, wpp, bsize, 1);
+        //return 0;
+      }
+      else
+        perror("fork fail: ");
+      deadpid =-1;
+    } //telos if xeirismou SIGCHLD
 
   }//telos while poy diabazei entoles
   //grapse to log sou ws gonios
   create_logfile(successful, failed, subdirs, dirs_writ);
+  delete[] dirs_per_wrk;
+  delete[] subdirs; //apodesmeush axreiastou pleon pinaka
 
   for(int i=0; i<wnum; i++){
     close(pipe_rfds[i].fd);
