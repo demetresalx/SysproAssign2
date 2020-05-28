@@ -20,24 +20,6 @@ void quit_hdl1(int signo){
   quitflag1=1; //gia na kserei sth megalh while ti tha kanei to paidi
 }
 
-//DE THA XREIASTEI
-//pernaei telika tis eggrafes kai stous allous HT afou exoun ginei oi elegxoi
-void populate_other_HTs(record_HT * rht , diseaseHashTable * dht, countryHashTable * cht){
-  for(unsigned int i=0; i<rht->size; i++){
-    if(rht->table[i] == NULL) //kenh alusida
-      continue;
-    else{
-      record_HT_node * currptr = rht->table[i];
-      while(currptr!= NULL){ //paei mexri kai to teleutaio. insert ta records poy exei ekei mesa o rht
-        //std::cout << currptr->rec_ptr->get_recordID() << " " << currptr->rec_ptr->get_diseaseID() << " " << currptr->rec_ptr->get_patientFirstName() << " " << currptr->rec_ptr->get_entryDate() << " " <<currptr->rec_ptr->get_exitDate() <<"\n";
-        dht->insert_record(currptr->rec_ptr);
-        cht->insert_record(currptr->rec_ptr);
-        currptr = currptr->next ;
-      }//telos while gia orizontia lista
-    }//telos else
-  }//telos for gia kathe alusida
-
-}
 
 //diabazei arxeio kai kanei populate tis domes (apo 1h ergasia oi perissoteres)
 void parse_records_from_file(std::string filename, std::string date, std::string folder, record_HT * rht, diseaseHashTable * dht, countryHashTable *cht,file_summary* summ){
@@ -92,7 +74,7 @@ void parse_records_from_file(std::string filename, std::string date, std::string
     if(summ->insert_data(true_record_parts) == 1)
       summary_entries += 1; //mphke kainourgia astheneia
 
-  }//telos while diabasmatos arxeiou, pername tis eggrafes stous alloues 2HT ths askhshs 1
+  }
   //std::cout << "i was " << filename << " " << summ->diseasename <<" "<< summ->age_cats[0] << "\n";
 }
 
@@ -149,7 +131,6 @@ int work(char * read_pipe, char * write_pipe, int bsize){
       delete[] date_files; //sbhse to new poy egine
     }
 
-    //populate_other_HTs(&records_htable, &diseases_htable, &countries_htable); //perna tis eggrafes sou kai stous allous 2 pinakes askhshs 1
     //records_htable.print_contents();
     //diseases_htable.print_contents();
     //countries_htable.print_contents();

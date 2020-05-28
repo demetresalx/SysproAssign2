@@ -64,8 +64,6 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   //ROUND-ROBIN KATANOMH YPO-KATALOGWN-XWRWN
   int dirs_writ = 0;
   for(int i=0; i<wnum; i++){
-    //pipe_wfds[i].events = POLLOUT; //arxikopoiw gia thn poll
-    //gia paidi i, grafw sto 2*i +1, diabazw apo to 2*
     write(pipe_wfds[i].fd, &(dirs_per_wrk[i]), sizeof(int)); //tou eipame oti diabazei teleutaia fora
     //std::cout << dirs_per_wrk[i];
     for(int j=0; j< dirs_per_wrk[i]; j++){
@@ -73,8 +71,6 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       //std::cout << "ok";
       send_string(pipe_wfds[i].fd, &(subdirs[dirs_writ]), bsize); //steile onoma xwras sketo
       send_string(pipe_wfds[i].fd, abuf, bsize); //steile to path
-      //write(pipe_wfds[i].fd, abuf, strlen(abuf)+1 ); //grapse to directory name
-      //std::cout << "egarpsa to " << subdirs[dirs_writ] << "\n";
       dirsofeach[i][j] = subdirs[dirs_writ]; //to krataw gia log
       dirs_writ++;
     }
@@ -83,15 +79,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
   std::string tool;
   int kids_read =0;
-  //EDW DIABAZW SUMMARY STATISTICS KAI EKTYPWNW, ISWS POLL
-  /*for(int i=0; i<wnum; i++){
-    for(int j=0; j< dirs_per_wrk[i]; j++){
-      int nfls =0;
-      read(pipe_rfds[i].fd, &nfls, sizeof(int));
-      for(int k=0; k<nfls; k++)
-        receive_and_print_file_summary(pipe_rfds[i].fd, bsize);
-    }
-  }*/
+
   //KANW POLL GIA SUMMARIES!! Etsi mporw na diabazw prwta ta summaries twn paidiwn poy exoun teleiwsei
   //meta to kathe summary sigourepsou mesw named pipe oti to i paidi teleiwse
   int already_read[wnum]; //mh diabaseis ksana to idio paidi
@@ -135,12 +123,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   delete[] dirs_per_wrk;
   delete[] subdirs; //apodesmeush axreiastou pleon pinaka
 
-  //sigourepsou (mesw blocking pipes) oti de tha proxwrhseis prin ola ta paidia teleiwsoun to parsing
-  /*for(int i=0; i<wnum; i++){
-    receive_string(pipe_rfds[i].fd, &tool, bsize);
-    if(tool == "ok") //teleiwse to parsing to paidi
-      glob_counter++;
-  }*/
+
   if(kids_read ==wnum)
     std::cout << "Parsing complete. Start giving commands!\n";
 
