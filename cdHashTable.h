@@ -47,20 +47,15 @@ public:
   void print_contents(); //ektypwnei auta p exei so far
   virtual int insert_record(record * ) {}; //to kathe derived class tha xeristei diaforetiko kleidi
   void recordPatientExit(std::string , std::string ); //gia to antistoixo erwthma
-  void total_recs_per_cat(); //gia to globalDiseaseStats me 0 orismata
-  void total_recs_per_cat(std::string, std::string ); //gia to globalDiseaseStats me dates orismata
 };
 
 class diseaseHashTable : public cdHashTable { //o hash table gia disease
 public:
   diseaseHashTable(int, int);
   int insert_record(record * );
-  void numCurrentPatients(std::string );
   int total_recs_for_cat(std::string, std::string , std::string ); //gia to diseaseFrequency xwris orisma country
   int total_recs_for_cat(std::string, std::string , std::string , std::string ); //gia to diseaseFrequency ME orisma country
   int admissions(std::string, std::string , std::string , std::string ); //gia admissions ME country
-  void topk_countries(int , std::string ); //antistoixo erwthma
-  void topk_countries(int , std::string , std::string, std::string ); //antistoixo erwthma me date1 k date2
   int discharges(std::string, std::string , std::string , std::string ); //gia discharges ME country
 };
 
@@ -68,8 +63,6 @@ class countryHashTable : public cdHashTable { //o hash table gia disease
 public:
   countryHashTable(int, int);
   int insert_record(record * );
-  void topk_diseases(int , std::string ); //antistoixo erwthma
-  void topk_diseases(int , std::string , std::string, std::string ); //antistoixo erwthma me date1 k date2
   int topk_age_ranges(int , std::string , std::string, std::string , std::string , int *, int *, float *); //omwnymo erwthma
 };
 
