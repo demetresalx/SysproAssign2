@@ -162,7 +162,7 @@ int work(char * read_pipe, char * write_pipe, int bsize, int dosumms){
   while(1){
 
     if(quitflag1 > 0) //fagame SIGINT/QUIT
-      {std::cout << "ciao\n";break;}
+      {/*std::cout << "ciao\n";*/break;}
 
     int rdb = receive_string(read_fd, &tool, bsize);
     while(tool == ""){
@@ -171,7 +171,7 @@ int work(char * read_pipe, char * write_pipe, int bsize, int dosumms){
     }
 
     if(quitflag1 > 0) //fagame SIGINT/QUIT
-      {std::cout << "ciao\n";break;}
+      {/*std::cout << "ciao\n";*/break;}
 
     if(tool == "/exit"){
           //isws cleanup??
@@ -331,7 +331,7 @@ int work(char * read_pipe, char * write_pipe, int bsize, int dosumms){
     }
 
     if(quitflag1 > 0) //fagame SIGINT/QUIT
-      {std::cout << "ciao\n";break;}
+      {/*std::cout << "ciao\n";*/break;}
 
   }
 
