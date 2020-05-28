@@ -176,10 +176,25 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             //pare apanthsh
             int intreader=0;
             int intreader2=0;
-            for(int i=0; i<wnum; i++){ //pare ton arithmo
-                read(pipe_rfds[i].fd, &intreader, sizeof(int));
-                intreader2 += intreader;
-            }
+            kids_read =0;
+            memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+            while(kids_read < wnum){
+              //arxikopoihsh se kathe loupa gia thn poll
+              reset_poll_parameters(pipe_rfds, wnum);
+              int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
+              if(rc == 0)
+                {;;/*std::cout << "timeout\n";*/}
+              else{ //tsekarw poioi einai etoimoi
+                for(int i=0; i<wnum; i++){
+                  if((pipe_rfds[i].revents == POLLIN) && (already_read[i] == 0)){ //1os diathesimos poy den exei diabastei
+                    read(pipe_rfds[i].fd, &intreader, sizeof(int));
+                    intreader2 += intreader;
+                    already_read[i] = 1;
+                    kids_read++;
+                  } //telos if diatheismothtas tou i
+                } //telos for diathesimothtas olwn
+              } //telos else timeout
+            }//telos while gia poll
             std::cout << intreader2 << "\n";
             successful++;//epituxia
           }
@@ -209,10 +224,25 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             //pare apanthsh
             int intreader=0;
             int intreader2=0;
-            for(int i=0; i<wnum; i++){ //pare ton arithmo
-                read(pipe_rfds[i].fd, &intreader, sizeof(int));
-                intreader2 += intreader;
-            }
+            kids_read =0;
+            memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+            while(kids_read < wnum){
+              //arxikopoihsh se kathe loupa gia thn poll
+              reset_poll_parameters(pipe_rfds, wnum);
+              int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
+              if(rc == 0)
+                {;;/*std::cout << "timeout\n";*/}
+              else{ //tsekarw poioi einai etoimoi
+                for(int i=0; i<wnum; i++){
+                  if((pipe_rfds[i].revents == POLLIN) && (already_read[i] == 0)){ //1os diathesimos poy den exei diabastei
+                    read(pipe_rfds[i].fd, &intreader, sizeof(int));
+                    intreader2 += intreader;
+                    already_read[i] = 1;
+                    kids_read++;
+                  } //telos if diatheismothtas tou i
+                } //telos for diathesimothtas olwn
+              } //telos else timeout
+            }//telos while gia poll
             std::cout << intreader2 << "\n";
             successful++;//epituxia
           }
@@ -313,8 +343,24 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, &requ[5], bsize);//steile date2
           }
           //pare kai ektupwse ta apotelesmata
-          for(int i=0; i<wnum; i++)
-            read_and_present_topk(pipe_rfds[i].fd);
+          kids_read =0;
+          memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+          while(kids_read < wnum){
+            //arxikopoihsh se kathe loupa gia thn poll
+            reset_poll_parameters(pipe_rfds, wnum);
+            int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
+            if(rc == 0)
+              {;;/*std::cout << "timeout\n";*/}
+            else{ //tsekarw poioi einai etoimoi
+              for(int i=0; i<wnum; i++){
+                if((pipe_rfds[i].revents == POLLIN) && (already_read[i] == 0)){ //1os diathesimos poy den exei diabastei
+                  read_and_present_topk(pipe_rfds[i].fd); //diabase k parousiase topk autounou
+                  already_read[i] = 1;
+                  kids_read++;
+                } //telos if diatheismothtas tou i
+              } //telos for diathesimothtas olwn
+            } //telos else timeout
+          }//telos while gia poll
           successful++;//epituxia
         }
         else{//ekana lathos sthn entolh
@@ -350,9 +396,24 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
           }
           //pare apanthsh
-          for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read_and_present_num_adms_disch(pipe_rfds[i].fd, bsize);
-          }
+          kids_read =0;
+          memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+          while(kids_read < wnum){
+            //arxikopoihsh se kathe loupa gia thn poll
+            reset_poll_parameters(pipe_rfds, wnum);
+            int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
+            if(rc == 0)
+              {;;/*std::cout << "timeout\n";*/}
+            else{ //tsekarw poioi einai etoimoi
+              for(int i=0; i<wnum; i++){
+                if((pipe_rfds[i].revents == POLLIN) && (already_read[i] == 0)){ //1os diathesimos poy den exei diabastei
+                  read_and_present_num_adms_disch(pipe_rfds[i].fd, bsize);
+                  already_read[i] = 1;
+                  kids_read++;
+                } //telos if diatheismothtas tou i
+              } //telos for diathesimothtas olwn
+            } //telos else timeout
+          }//telos while gia poll
           successful++;//epituxia
         }
         else if(ind ==5){ //me proairetiko orisma country
@@ -381,10 +442,25 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           //pare apanthsh
           int intreader=0;
           int intreader2=0;
-          for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read(pipe_rfds[i].fd, &intreader, sizeof(int));
-              intreader2 += intreader;
-          }
+          kids_read =0;
+          memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+          while(kids_read < wnum){
+            //arxikopoihsh se kathe loupa gia thn poll
+            reset_poll_parameters(pipe_rfds, wnum);
+            int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
+            if(rc == 0)
+              {;;/*std::cout << "timeout\n";*/}
+            else{ //tsekarw poioi einai etoimoi
+              for(int i=0; i<wnum; i++){
+                if((pipe_rfds[i].revents == POLLIN) && (already_read[i] == 0)){ //1os diathesimos poy den exei diabastei
+                  read(pipe_rfds[i].fd, &intreader, sizeof(int));
+                  intreader2 += intreader;
+                  already_read[i] = 1;
+                  kids_read++;
+                } //telos if diatheismothtas tou i
+              } //telos for diathesimothtas olwn
+            } //telos else timeout
+          }//telos while gia poll
           std::cout << intreader2 << "\n";
           successful++;//epituxia
         }
@@ -421,9 +497,24 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
             send_string(pipe_wfds[i].fd, &requ[3], bsize);//steile date2
           }
           //pare apanthsh
-          for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read_and_present_num_adms_disch(pipe_rfds[i].fd, bsize);
-          }
+          kids_read =0;
+          memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+          while(kids_read < wnum){
+            //arxikopoihsh se kathe loupa gia thn poll
+            reset_poll_parameters(pipe_rfds, wnum);
+            int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
+            if(rc == 0)
+              {;;/*std::cout << "timeout\n";*/}
+            else{ //tsekarw poioi einai etoimoi
+              for(int i=0; i<wnum; i++){
+                if((pipe_rfds[i].revents == POLLIN) && (already_read[i] == 0)){ //1os diathesimos poy den exei diabastei
+                  read_and_present_num_adms_disch(pipe_rfds[i].fd, bsize);
+                  already_read[i] = 1;
+                  kids_read++;
+                } //telos if diatheismothtas tou i
+              } //telos for diathesimothtas olwn
+            } //telos else timeout
+          }//telos while gia poll
           successful++;//epituxia
         }
         else if(ind ==5){ //me proairetiko orisma country
@@ -452,10 +543,25 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
           //pare apanthsh
           int intreader=0;
           int intreader2=0;
-          for(int i=0; i<wnum; i++){ //pare ton arithmo
-              read(pipe_rfds[i].fd, &intreader, sizeof(int));
-              intreader2 += intreader;
-          }
+          kids_read =0;
+          memset(already_read, 0, sizeof(already_read)); // arxika ola adiabasta
+          while(kids_read < wnum){
+            //arxikopoihsh se kathe loupa gia thn poll
+            reset_poll_parameters(pipe_rfds, wnum);
+            int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
+            if(rc == 0)
+              {;;/*std::cout << "timeout\n";*/}
+            else{ //tsekarw poioi einai etoimoi
+              for(int i=0; i<wnum; i++){
+                if((pipe_rfds[i].revents == POLLIN) && (already_read[i] == 0)){ //1os diathesimos poy den exei diabastei
+                  read(pipe_rfds[i].fd, &intreader, sizeof(int));
+                  intreader2 += intreader;
+                  already_read[i] = 1;
+                  kids_read++;
+                } //telos if diatheismothtas tou i
+              } //telos for diathesimothtas olwn
+            } //telos else timeout
+          }//telos while gia poll
           std::cout << intreader2 << "\n";
           successful++;//epituxia
         }
