@@ -105,7 +105,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
 
     int rc = poll(pipe_rfds, wnum, 2000); //kanw poll
     if(rc == 0)
-      std::cout << "timeout\n";
+      {;;/*std::cout << "timeout\n";*/}
     else{//tsekarw poioi einai etoimoi
       for(int i=0; i<wnum; i++){
         //an einai etoimo kai den to exw ksanadiabasei
@@ -142,7 +142,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
       glob_counter++;
   }*/
   if(kids_read ==wnum)
-    std::cout << "parsing donezo!\n";
+    std::cout << "Parsing complete. Start giving commands!\n";
 
   //ARXIZOUN OI ENTOLES
   std::string line;
@@ -498,7 +498,7 @@ int administrate(char * in_dir, int wnum, int bsize, std::string * pipe_names, i
   }//telos while poy diabazei entoles
   //grapse to log sou ws gonios
   create_logfile(successful, failed, subdirs, dirs_writ);
-  //sleep(5);
+
   for(int i=0; i<wnum; i++){
     close(pipe_rfds[i].fd);
     close(pipe_wfds[i].fd);

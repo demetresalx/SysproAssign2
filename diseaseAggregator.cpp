@@ -69,52 +69,14 @@ int main(int argc, char** argv){
     administrate(input_path, numWorkers , bufferSize ,pip_names, pids);
 
 
-    /*while(1){
-      getline(std::cin, line);
-      //line = "wendy";
-      strcpy(cbuf, line.c_str());
-      if(line == "/exit"){
-        kill(pid, SIGKILL);
-        break;
-        //wait();
-        //exit(1);
-      }
-      else{
-        //std::cout << "mphka loypa\n";
-        //fd = open("maju", O_WRONLY  );
-        write(fd, cbuf, strlen(line.c_str())+1 );
-        //std::cout <<  strlen(line.c_str());
-        kill(pid, SIGUSR1);
-        //sleep(2);
-        //close(fd);
-      }
-      maho=0;
-
-    }
-    */
+    
   }
   else{ //child
 
     //douleia sto worker.cpp
     work(pipe_names[2*child_index +1],pipe_names[2*child_index], bufferSize);
 
-    //while(1){
-      //std::cout << "child openchan\n";
-      //fd = open("maju", O_RDONLY );
-      //if(maho==1){
-        //while(read(fd, cbuf, 156) >0){
-          //std::cout <<"[" <<cbuf<<"]\n";
-        //}
-        //close(fd);
-        //int bread = read(fd, cbuf, 156);
-        //std::cout << bread<<"\n";
-        /*if(bread >0)
-          std::cout <<"[" <<cbuf<<"]\n";
-        else
-          sleep(0);*/
-      //}
-      //maho =0;
-    //}
+
   }
 
   //Perimene kathe paidi kai sbhse ta pipes tou
