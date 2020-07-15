@@ -28,6 +28,6 @@ clean:
 #./create_infiles.sh ../inputs/ass2/disfile ../inputs/ass2/coufile ../inputs/ass2/input_dir 4 10
 #../inputs/ass2/input_dir
 
-
+#/home/demetres/Desktop/bashforLarge/input_dir
 #valgrind
 #valgrind --leak-check=full ./diseaseAggregator -i ../inputs/ass2/input_dir -w 3 -b 128
